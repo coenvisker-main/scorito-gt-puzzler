@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Scorito GT Puzzler — Giro d'Italia 2026</title>
     <meta name="description" content="De ultieme tool voor Scorito Grand Tour fantasy cycling. Bouw je team, analyseer het parcours en maximaliseer je score." />
+    
+    <!-- Open Graph / WhatsApp Sharing -->
+    <meta property="og:title" content="Scorito GT Puzzler — Giro d'Italia 2026" />
+    <meta property="og:description" content="Bouw het ultieme team voor de Giro! Met parcours-analyse, budget tracker en matrix overzicht." />
+    <meta property="og:image" content="https://scorito-gt-puzzler.netlify.app/assets/index-aJhpUvFI.css" /> <!-- Note: Ideally a real image, but using a placeholder for now -->
+    <meta property="og:url" content="https://scorito-gt-puzzler.netlify.app/showcase.html" />
+    <meta property="og:type" content="website" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet" />
@@ -19,6 +27,7 @@
             --border: #27272a;
             --text: #fafafa;
             --muted: #71717a;
+            --whatsapp: #25d366;
         }
 
         html { scroll-behavior: smooth; }
@@ -138,6 +147,24 @@
         }
 
         .btn-primary:hover { transform: scale(1.05); box-shadow: 0 0 48px rgba(245,158,11,.5); }
+
+        .btn-whatsapp {
+            display: inline-flex;
+            align-items: center;
+            gap: .6rem;
+            background: var(--whatsapp);
+            color: white;
+            font-size: .85rem;
+            font-weight: 900;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            padding: .85rem 2rem;
+            border-radius: .75rem;
+            text-decoration: none;
+            transition: transform .2s, box-shadow .2s;
+        }
+
+        .btn-whatsapp:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(37, 211, 102, 0.4); }
 
         .btn-secondary {
             display: inline-flex;
@@ -362,7 +389,7 @@
         /* responsive */
         @media (max-width: 600px) {
             .cta-group { flex-direction: column; align-items: center; }
-            .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+            .btn-primary, .btn-secondary, .btn-whatsapp { width: 100%; justify-content: center; }
         }
     </style>
 </head>
@@ -386,11 +413,11 @@
     </p>
 
     <div class="cta-group">
-        <a href="APP_URL_PLACEHOLDER" class="btn-primary">
+        <a href="https://scorito-gt-puzzler.netlify.app/" class="btn-primary">
             ▶&nbsp; Open de App
         </a>
-        <a href="#hoe-werkt-het" class="btn-secondary">
-            Hoe werkt het? ↓
+        <a href="whatsapp://send?text=Check deze Scorito tool voor de Giro! 🚴‍♂️ https://scorito-gt-puzzler.netlify.app/showcase.html" class="btn-whatsapp">
+            Deel via WhatsApp
         </a>
     </div>
 </section>
@@ -527,11 +554,18 @@
     <p style="color: var(--muted); font-weight:700; font-size:.9rem; margin-bottom: 2rem;">
         De Giro d'Italia 2026 start op 9 mei. Bouw nu je team.
     </p>
-    <a href="APP_URL_PLACEHOLDER" class="btn-primary">▶&nbsp; Open de App</a>
+    <div class="cta-group">
+        <a href="https://scorito-gt-puzzler.netlify.app/" class="btn-primary">▶&nbsp; Open de App</a>
+        <a href="whatsapp://send?text=Check deze Scorito tool voor de Giro! 🚴‍♂️ https://scorito-gt-puzzler.netlify.app/showcase.html" class="btn-whatsapp">Deel via WhatsApp</a>
+    </div>
 </div>
 
 <footer>
     <p>Scorito GT Puzzler &mdash; Giro d'Italia 2026 &mdash; Gebouwd voor vrienden, door vrienden</p>
+</footer>
+
+</body>
+</html>o d'Italia 2026 &mdash; Gebouwd voor vrienden, door vrienden</p>
 </footer>
 
 </body>
