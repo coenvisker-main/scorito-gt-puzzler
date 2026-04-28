@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scorito GT Puzzler — Giro d'Italia 2026</title>
+    <meta name="description" content="De ultieme tool voor Scorito Grand Tour fantasy cycling. Bouw je team, analyseer het parcours en maximaliseer je score." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --amber: #f59e0b;
+            --amber-dim: #92400e;
+            --bg: #09090b;
+            --surface: #18181b;
+            --border: #27272a;
+            --text: #fafafa;
+            --muted: #71717a;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── HERO ── */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 50% -10%, rgba(245,158,11,.18) 0%, transparent 70%),
+                radial-gradient(ellipse 60% 40% at 80% 60%, rgba(245,158,11,.06) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .grid-overlay {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(245,158,11,.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(245,158,11,.04) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            background: rgba(245,158,11,.1);
+            border: 1px solid rgba(245,158,11,.3);
+            color: var(--amber);
+            font-size: .7rem;
+            font-weight: 900;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            padding: .4rem 1rem;
+            border-radius: 9999px;
+            margin-bottom: 2rem;
+        }
+
+        .badge-dot {
+            width: .45rem; height: .45rem;
+            background: var(--amber);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: .5; transform: scale(.8); }
+        }
+
+        h1 {
+            font-size: clamp(3rem, 10vw, 7rem);
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -.04em;
+            text-transform: uppercase;
+            font-style: italic;
+            margin-bottom: 1.5rem;
+        }
+
+        h1 span { color: var(--amber); }
+
+        .subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            color: var(--muted);
+            max-width: 540px;
+            line-height: 1.6;
+            font-weight: 700;
+            margin-bottom: 2.5rem;
+        }
+
+        .cta-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: .6rem;
+            background: var(--amber);
+            color: #09090b;
+            font-size: .85rem;
+            font-weight: 900;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            padding: .85rem 2rem;
+            border-radius: .75rem;
+            text-decoration: none;
+            transition: transform .2s, box-shadow .2s;
+            box-shadow: 0 0 32px rgba(245,158,11,.3);
+        }
+
+        .btn-primary:hover { transform: scale(1.05); box-shadow: 0 0 48px rgba(245,158,11,.5); }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: .6rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: .85rem;
+            font-weight: 900;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            padding: .85rem 2rem;
+            border-radius: .75rem;
+            text-decoration: none;
+            transition: border-color .2s, background .2s;
+        }
+
+        .btn-secondary:hover { border-color: #52525b; background: var(--surface); }
+
+        /* ── FEATURES ── */
+        .section {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 5rem 2rem;
+        }
+
+        .section-label {
+            font-size: .65rem;
+            font-weight: 900;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--amber);
+            margin-bottom: .75rem;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 900;
+            letter-spacing: -.03em;
+            text-transform: uppercase;
+            font-style: italic;
+            margin-bottom: 1rem;
+        }
+
+        .section-sub {
+            color: var(--muted);
+            font-weight: 700;
+            max-width: 480px;
+            line-height: 1.6;
+            margin-bottom: 3rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 1.25rem;
+            padding: 2rem;
+            transition: border-color .2s, transform .2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(245,158,11,.4), transparent);
+            opacity: 0;
+            transition: opacity .3s;
+        }
+
+        .feature-card:hover { border-color: #3f3f46; transform: translateY(-2px); }
+        .feature-card:hover::before { opacity: 1; }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .feature-title {
+            font-size: 1.1rem;
+            font-weight: 900;
+            letter-spacing: -.02em;
+            text-transform: uppercase;
+            font-style: italic;
+            margin-bottom: .5rem;
+        }
+
+        .feature-desc {
+            font-size: .85rem;
+            color: var(--muted);
+            font-weight: 700;
+            line-height: 1.6;
+        }
+
+        /* ── HOW IT WORKS ── */
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            max-width: 640px;
+        }
+
+        .step {
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+            position: relative;
+        }
+
+        .step + .step { margin-top: 0; }
+
+        .step-left {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+
+        .step-num {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: var(--amber);
+            color: #09090b;
+            font-weight: 900;
+            font-size: .9rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .step-line {
+            width: 2px;
+            flex: 1;
+            min-height: 2.5rem;
+            background: linear-gradient(to bottom, rgba(245,158,11,.4), transparent);
+            margin: .4rem 0;
+        }
+
+        .step:last-child .step-line { display: none; }
+
+        .step-content {
+            padding-bottom: 2.5rem;
+        }
+
+        .step-title {
+            font-size: 1rem;
+            font-weight: 900;
+            letter-spacing: -.01em;
+            margin-bottom: .4rem;
+            padding-top: .35rem;
+        }
+
+        .step-desc {
+            font-size: .85rem;
+            color: var(--muted);
+            font-weight: 700;
+            line-height: 1.6;
+        }
+
+        /* ── DIVIDER ── */
+        .divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 0 2rem;
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--muted);
+            font-size: .75rem;
+            font-weight: 700;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+        }
+
+        /* ── STATS BAR ── */
+        .stats-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 3rem;
+            padding: 2.5rem 2rem;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 900;
+            font-style: italic;
+            color: var(--amber);
+            letter-spacing: -.03em;
+        }
+
+        .stat-label {
+            font-size: .65rem;
+            font-weight: 900;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-top: .2rem;
+        }
+
+        /* responsive */
+        @media (max-width: 600px) {
+            .cta-group { flex-direction: column; align-items: center; }
+            .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="grid-overlay"></div>
+
+    <div class="badge">
+        <span class="badge-dot"></span>
+        Giro d'Italia 2026 — Live
+    </div>
+
+    <h1>Scorito GT<br /><span>Puzzler</span></h1>
+
+    <p class="subtitle">
+        De ultieme fantasy cycling tool voor Scorito Grand Tour.
+        Bouw je droomteam, analyseer het parcours per etappe en
+        maximaliseer je score met slim budget- en typebeheer.
+    </p>
+
+    <div class="cta-group">
+        <a href="APP_URL_PLACEHOLDER" class="btn-primary">
+            ▶&nbsp; Open de App
+        </a>
+        <a href="#hoe-werkt-het" class="btn-secondary">
+            Hoe werkt het? ↓
+        </a>
+    </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+    <div class="stat">
+        <div class="stat-value">94</div>
+        <div class="stat-label">Renners</div>
+    </div>
+    <div class="stat">
+        <div class="stat-value">21</div>
+        <div class="stat-label">Etappes</div>
+    </div>
+    <div class="stat">
+        <div class="stat-value">€52M</div>
+        <div class="stat-label">Budget</div>
+    </div>
+    <div class="stat">
+        <div class="stat-value">20</div>
+        <div class="stat-label">Teamslots</div>
+    </div>
+</div>
+
+<!-- FEATURES -->
+<section class="section">
+    <p class="section-label">Wat kan je ermee</p>
+    <h2 class="section-title">Alles wat je nodig hebt</h2>
+    <p class="section-sub">
+        Geen spreadsheets meer. Alle informatie op één plek, realtime bijgehouden.
+    </p>
+
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">🚴</div>
+            <h3 class="feature-title">Teambuilder Matrix</h3>
+            <p class="feature-desc">
+                Selecteer 20 renners uit de volledige startlijst binnen een budget van €52M.
+                Zoek op naam of ploeg, zie live welk type renner je nodig hebt.
+            </p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🏔️</div>
+            <h3 class="feature-title">Parcours Analyse</h3>
+            <p class="feature-desc">
+                Bekijk het etappeprofiel per dag. Stel gewichten in per rennertype (GC, Klimmer,
+                Sprinter, Tijdrijder…) en zie welk type het meest waardevol is over de hele ronde.
+            </p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">💰</div>
+            <h3 class="feature-title">Budget Tracker</h3>
+            <p class="feature-desc">
+                Realtime budget-indicator zodat je precies weet hoeveel ruimte je nog hebt.
+                Wisselspelers slim inzetten? De matrix helpt je je geld optimaal te verdelen.
+            </p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">⭐</div>
+            <h3 class="feature-title">Kapiteins & Opstelling</h3>
+            <p class="feature-desc">
+                Stel per etappe je opstelling in met X (speelt) en K (kapitein).
+                De matrix geeft een volledig overzicht over alle 21 etappes.
+            </p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3 class="feature-title">Type Distributie</h3>
+            <p class="feature-desc">
+                Zie direct of je team in balans is op basis van het parcours.
+                De tool berekent de optimale verdeling en toont hoeveel je afwijkt.
+            </p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">💾</div>
+            <h3 class="feature-title">Automatisch Opgeslagen</h3>
+            <p class="feature-desc">
+                Je team wordt lokaal opgeslagen in je browser. Sluit de tab en kom terug —
+                alles staat er nog precies zoals je het had.
+            </p>
+        </div>
+    </div>
+</section>
+
+<hr class="divider" />
+
+<!-- HOW IT WORKS -->
+<section class="section" id="hoe-werkt-het">
+    <p class="section-label">Zo doe je mee</p>
+    <h2 class="section-title">In 3 stappen<br />klaar</h2>
+    <p class="section-sub">
+        Geen account nodig, geen installatie. Gewoon openen en beginnen.
+    </p>
+
+    <div class="steps">
+        <div class="step">
+            <div class="step-left">
+                <div class="step-num">1</div>
+                <div class="step-line"></div>
+            </div>
+            <div class="step-content">
+                <h3 class="step-title">Open de app</h3>
+                <p class="step-desc">Ga naar de app via de knop hierboven. Geen account of installatie nodig — werkt gewoon in je browser.</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-left">
+                <div class="step-num">2</div>
+                <div class="step-line"></div>
+            </div>
+            <div class="step-content">
+                <h3 class="step-title">Analyseer het parcours</h3>
+                <p class="step-desc">Ga naar het STAGES tabblad en bekijk alle 21 etappes. Pas eventueel de gewichten aan op jouw strategie.</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-left">
+                <div class="step-num">3</div>
+                <div class="step-line"></div>
+            </div>
+            <div class="step-content">
+                <h3 class="step-title">Bouw je team</h3>
+                <p class="step-desc">Ga naar TEAMBUILDER, selecteer 20 renners, zet je kapiteins en opstelling per etappe — en je bent klaar voor de Giro!</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA FOOTER -->
+<div class="stats-bar" style="border-top: 1px solid #27272a; justify-content: center; gap: 0; flex-direction: column; align-items: center; padding: 4rem 2rem; background: transparent;">
+    <h2 style="font-size: clamp(1.5rem,4vw,2.5rem); font-weight:900; letter-spacing:-.03em; text-transform:uppercase; font-style:italic; margin-bottom:1rem;">
+        Klaar voor de <span style="color: var(--amber)">Giro?</span>
+    </h2>
+    <p style="color: var(--muted); font-weight:700; font-size:.9rem; margin-bottom: 2rem;">
+        De Giro d'Italia 2026 start op 9 mei. Bouw nu je team.
+    </p>
+    <a href="APP_URL_PLACEHOLDER" class="btn-primary">▶&nbsp; Open de App</a>
+</div>
+
+<footer>
+    <p>Scorito GT Puzzler &mdash; Giro d'Italia 2026 &mdash; Gebouwd voor vrienden, door vrienden</p>
+</footer>
+
+</body>
+</html>

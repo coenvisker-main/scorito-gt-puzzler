@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+dist/
+
+# Build artifacts
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+
+# Local env
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db

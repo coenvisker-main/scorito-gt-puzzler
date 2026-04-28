@@ -1,0 +1,212 @@
+[
+    {
+        "nummer": 1,
+        "datum": "2026-05-08",
+        "startplaats": "Nessebar",
+        "finishplaats": "Burgas",
+        "afstand": 156.0,
+        "terreintype": "vlak",
+        "hoogteverschil": 887,
+        "weging_tijdrit": false
+    },
+    {
+        "nummer": 2,
+        "datum": "2026-05-09",
+        "startplaats": "Burgas",
+        "finishplaats": "Valiko Tarnovo",
+        "afstand": 220.0,
+        "terreintype": "bergen",
+        "hoogteverschil": 2370,
+        "weging_tijdrit": false
+    },
+    {
+        "nummer": 3,
+        "datum": "2026-05-10",
+        "startplaats": "Plovdiv",
+        "finishplaats": "Sofia",
+        "afstand": 174.0,
+        "terreintype": "heuvels",
+        "hoogteverschil": 1563,
+        "weging_tijdrit": false
+    },
+    {
+        "nummer": 4,
+        "datum": "2026-05-12",
+        "startplaats": "Catanzaro",
+        "finishplaats": "Cosenza",
+        "afstand": 144.0,
+        "terreintype": "bergen",
+        "hoogteverschil": 1660,
+        "weging_tijdrit": false
+    },
+    {
+        "nummer": 5,
+        "datum": "2026-05-13",
+        "startplaats": "Praia a Mare",
+        "finishplaats": "Potenza",
+        "afstand": 204.0,
+        "terreintype": "heuvels",
+        "hoogteverschil": 3738,
+        "weging_tijdrit": false
+    },
+    {
+        "nummer": 6,
+        "datum": "2026-05-14",
+        "startplaats": "Paestum",
+        "finishplaats": "Naples",
+        "afstand": 161.0,
+        "terreintype": "heuvels",
+        "hoogteverschil": 1173,
+        "weging_tijdrit": false
+    },
+    {
+        "nummer": 7,
+        "datum": "2026-05-15",
+        "startplaats": "Formia",
+        "finishplaats": "Blockhaus",
+        "afstand": 246.0,
+        "terreintype": "bergen",
+        "hoogteverschil": 4472,
+        "weging_tijdrit": false
+    },
+    {
+        "nummer": 8,
+        "datum": "2026-05-16",
+        "startplaats": "Chieti",
+        "finishplaats": "Fermo",
+        "afstand": 159.0,
+        "terreintype": "heuvels",
+        "hoogteverschil": 1872,
+        "weging_tijdrit": false
+    },
+    {
+        "nummer": 9,
+        "datum": "2026-05-17",
+        "startplaats": "Cervia",
+        "finishplaats": "Corno alle Scale",
+        "afstand": 184.0,
+        "terreintype": "bergen",
+        "hoogteverschil": 2352,
+        "weging_tijdrit": false
+    },
+    {
+        "nummer": 10,
+        "datum": "2026-05-19",
+        "startplaats": "Viareggio",
+        "finishplaats": "Massa",
+        "afstand": 40.2,
+        "terreintype": "tijdrit",
+        "hoogteverschil": 98,
+        "weging_tijdrit": true
+    },
+    {
+        "nummer": 11,
+        "datum": "2026-05-20",
+        "startplaats": "Porcari (Paper District)",
+        "finishplaats": "Chiavari",
+        "afstand": 178.0,
+        "terreintype": "heuvels",
+        "hoogteverschil": 2550,
+        "weging_tijdrit": false
+    },
+    {
+        "nummer": 12,
+        "datum": "2026-05-21",
+        "startplaats": "Imperia",
+        "finishplaats": "Novi Ligure",
+        "afstand": 177.0,
+        "terreintype": "heuvels",
+        "hoogteverschil": 2165,
+        "weging_tijdrit": false
+    },
+    {
+        "nummer": 13,
+        "datum": "2026-05-22",
+        "startplaats": "Alessandria",
+        "finishplaats": "Verbania",
+        "afstand": 186.0,
+        "terreintype": "heuvels",
+        "hoogteverschil": 1398,
+        "weging_tijdrit": false
+    },
+    {
+        "nummer": 14,
+        "datum": "2026-05-23",
+        "startplaats": "Aosta",
+        "finishplaats": "Pila",
+        "afstand": 133.0,
+        "terreintype": "bergen",
+        "hoogteverschil": 4202,
+        "weging_tijdrit": false
+    },
+    {
+        "nummer": 15,
+        "datum": "2026-05-24",
+        "startplaats": "Voghera",
+        "finishplaats": "Milan",
+        "afstand": 136.0,
+        "terreintype": "vlak",
+        "hoogteverschil": 630,
+        "weging_tijdrit": false
+    },
+    {
+        "nummer": 16,
+        "datum": "2026-05-26",
+        "startplaats": "Bellinzona",
+        "finishplaats": "Carì",
+        "afstand": 113.0,
+        "terreintype": "bergen",
+        "hoogteverschil": 2961,
+        "weging_tijdrit": false
+    },
+    {
+        "nummer": 17,
+        "datum": "2026-05-27",
+        "startplaats": "Cassano d'Adda",
+        "finishplaats": "Andalo",
+        "afstand": 200.0,
+        "terreintype": "heuvels",
+        "hoogteverschil": 3216,
+        "weging_tijdrit": false
+    },
+    {
+        "nummer": 18,
+        "datum": "2026-05-28",
+        "startplaats": "Fai della Paganella",
+        "finishplaats": "Pieve di Soligo",
+        "afstand": 167.0,
+        "terreintype": "heuvels",
+        "hoogteverschil": 1889,
+        "weging_tijdrit": false
+    },
+    {
+        "nummer": 19,
+        "datum": "2026-05-29",
+        "startplaats": "Feltre",
+        "finishplaats": "Alleghe (Piani di Pezzè)",
+        "afstand": 151.0,
+        "terreintype": "bergen",
+        "hoogteverschil": 4834,
+        "weging_tijdrit": false
+    },
+    {
+        "nummer": 20,
+        "datum": "2026-05-30",
+        "startplaats": "Gemona del Friuli 1976-2026",
+        "finishplaats": "Piancavallo",
+        "afstand": 199.0,
+        "terreintype": "bergen",
+        "hoogteverschil": 3827,
+        "weging_tijdrit": false
+    },
+    {
+        "nummer": 21,
+        "datum": "2026-05-31",
+        "startplaats": "Rome",
+        "finishplaats": "Rome",
+        "afstand": 131.0,
+        "terreintype": "vlak",
+        "hoogteverschil": 1329,
+        "weging_tijdrit": false
+    }
+]

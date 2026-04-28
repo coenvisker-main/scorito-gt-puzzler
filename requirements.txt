@@ -1,0 +1,488 @@
+================================================================================
+REQUIREMENTS: SCORITO GRAND TOUR PUZZLER
+================================================================================
+Opgesteld via requirements engineering interview
+Datum: april 2026
+================================================================================
+
+
+1. PROJECT CONTEXT & UITGANGSPUNTEN
+================================================================================
+
+Doel:
+Een webapplicatie die wielerfans helpt bij het samenstellen en analyseren van
+hun Scorito fantasy-team voor de grote wielerrondes (Giro, Tour, Vuelta), met
+als primaire focus de voorbereiding vóór de start van een ronde.
+
+Primaire gebruiker:
+Wielerfans die meedoen aan het Scorito grote rondes-spel.
+
+Beheerder:
+De bouwheer van de applicatie heeft extra rechten voor databeheer
+(architectureel voorbereid, niet gebouwd in PoC).
+
+
+AANNAMES & RISICO'S
+------------------------------------------------------------
+A1  Externe datascraping (Scorito, PCS) is technisch mogelijk maar juridisch
+    grijs en kan breken bij sitewijzigingen. Impact: HOOG
+
+A2  Scorito publiceert geen officiële API — data wordt geparst van publieke
+    pagina's. Impact: HOOG
+
+A3  Authenticatie wordt architectureel voorbereid maar niet geïmplementeerd
+    in PoC. Impact: MIDDEL
+
+A4  Spelregels Scorito zijn stabiel (gevalideerd o.b.v. aangeleverde
+    documentatie). Impact: LAAG
+
+A5  Het wegingsmodel per etappe is gebruikersdata, geen externe bron.
+    Impact: LAAG
+
+
+================================================================================
+2. SCORITO SPELREGELS (BUSINESSLOGICA)
+================================================================================
+
+2.1 Teamsamenstelling
+------------------------------------------------------------
+- Je kiest exact 20 renners binnen een fictief budget (ca. €50–56 miljoen,
+  afhankelijk van de ronde).
+- Scorito-categorieën (ter indicatie, geen verplichte quota):
+  Klassementsrenner, Klimmer, Sprinter, Aanvaller, Tijdrijder, Knecht.
+- Gebruikersclassificatie in deze applicatie (eigen indeling):
+  GC, Sprinter, Sprint+, Klimmer, Aanvaller, Tijdrijder, Wildcard.
+
+2.2 Dagelijkse opstelling
+------------------------------------------------------------
+- Per etappe stel je 9 van je 20 renners op.
+- Alleen de 9 opgestelde renners kunnen die dag punten verdienen.
+- Je wijst per etappe één kopman aan uit de 9.
+- Etappepunten van de kopman worden verdubbeld (200%).
+- Trui- en teampunten van de kopman worden NIET verdubbeld.
+
+2.3 Puntenbronnen per etappe
+------------------------------------------------------------
+A. Etappe-uitslag (top 20 scoort):
+   1e: 50 pt | 2e: 44 pt | 3e: 40 pt | 4e: 36 pt | 5e: 32 pt
+   6e: 30 pt | 7e: 28 pt | 8e: 26 pt | 9e: 24 pt | 10e: 22 pt
+   11e t/m 20e: loopt af met 2 pt per positie (20, 18, 16 ... 2)
+
+B. Klassementspunten (truipunten, top 5 per klassement):
+   Algemeen Klassement:   1e=10 | 2e=8 | 3e=6 | 4e=4 | 5e=2
+   Puntenklassement:      1e=8  | 2e=6 | 3e=4 | 4e=2 | 5e=1
+   Bergklassement:        1e=6  | 2e=4 | 3e=3 | 4e=2 | 5e=1
+   Jongerenklassement:    1e=5  | 2e=3 | 3e=2 | 4e=1
+
+C. Teampunten (via ploeggenoten van opgestelde renners):
+   Ploeggenoot wint etappe:              10 pt
+   Ploeggenoot 1e in Alg. Klassement:    8 pt
+   Ploeggenoot 1e in Puntenklassement:   6 pt
+   Ploeggenoot 1e in Bergklassement:     4 pt
+   Ploeggenoot 1e in Jongerenklassement: 3 pt
+   (Bij meerdere truien: alleen hoogste trui telt)
+
+2.4 Eindklassementen (na laatste etappe)
+------------------------------------------------------------
+- Alle 20 renners tellen automatisch mee (geen dagopstelling vereist).
+
+A. Individuele einduitslag:
+   Algemeen Klassement (top 20):
+   1e=100 | 2e=80 | 3e=60 | 4e=50 | 5e=40 | 6e=36 | 7e=32 | 8e=28
+   9e=24  | 10e=22 | 11e t/m 20e: loopt af met 2 pt
+
+   Puntenklassement (top 10):
+   1e=80 | 2e=60 | 3e=40 | 4e=30 | 5e=20 | 6e=16 | 7e=12 | 8e=8 | 9e=4 | 10e=2
+
+   Bergklassement (top 10):
+   1e=60 | 2e=40 | 3e=30 | 4e=20 | 5e=16 | 6e=12 | 7e=8 | 8e=6 | 9e=4 | 10e=2
+
+   Jongerenklassement (top 5):
+   1e=50 | 2e=30 | 3e=20 | 4e=10 | 5e=5
+
+B. Teampunten eindklassement:
+   Ploegmaat wint Alg. Klassement:       24 pt
+   Ploegmaat wint Puntenklassement:      18 pt
+   Ploegmaat wint Bergklassement:        12 pt
+   Ploegmaat wint Jongerenklassement:     9 pt
+
+2.5 Ploegentijdrit (uitzonderingsregel)
+------------------------------------------------------------
+- Geen kopman mogelijk (kopmanpunten vervallen).
+- Top 8 winnende ploegen krijgen etappepunten:
+  1e=40 | 2e=32 | 3e=28 | 4e=24 | 5e=20 | 6e=16 | 7e=12 | 8e=8
+- Normale teampunten zijn tijdens de TTT niet van toepassing.
+
+
+================================================================================
+3. DOMEINMODEL (DATA)
+================================================================================
+
+3.1 Kernentiteiten
+------------------------------------------------------------
+
+Ronde (GrandTour)
+  - naam (Giro / Tour / Vuelta)
+  - jaar
+  - budget (fictief, bijv. €52.000.000)
+  - status (aankomend / actief / afgelopen)
+  - Etappes[]
+
+Etappe
+  - nummer
+  - datum
+  - startplaats
+  - finishplaats
+  - afstand (km)
+  - terreintype (vrij tekstveld + suggestie)
+  - hoogteverschil (optioneel)
+  - beschrijving (optioneel)
+  - weging_tijdrit (boolean, aparte spelregel)
+  - RennerTypeWegingen[]
+      - type: [GC | Sprinter | Sprint+ | Klimmer | Aanvaller | Tijdrijder | Wildcard]
+      - gewicht (0.0–1.0, som = 1.0)
+
+Renner
+  - naam
+  - ploeg (echte wielerploeg)
+  - scorito_categorie (officieel Scorito label)
+  - gebruiker_type [GC | Sprinter | Sprint+ | Klimmer | Aanvaller | Tijdrijder | Wildcard]
+  - prijs (per ronde, in €)
+  - is_actief_in_ronde (boolean)
+  - externe_data (optioneel): vorm, PCS-score, leeftijd, nationaliteit
+
+Team (per gebruiker, per ronde)
+  - naam
+  - ronde_ref
+  - budget_gebruikt
+  - TeamSlots[20]
+      - renner_ref
+      - EtappeOpstellingen[]
+          - etappe_ref
+          - staat_opgesteld (boolean)
+          - is_kopman_kandidaat (boolean)
+
+3.2 Afgeleide berekeningen
+------------------------------------------------------------
+
+Optimale teamverdeling:
+  Per type: Som(gewicht × etappe_weging) / totaal → × 20 renners, afgerond
+  Gebruik: Parcoursanalyse
+
+Budget resterend:
+  ronde_budget − Som(prijs geselecteerde renners)
+  Gebruik: Teambuilder
+
+Type-match score:
+  Werkelijke count per type vs. optimale count per type
+  Gebruik: Teambuilder feedback
+
+Teampunten synergiegroepen:
+  Groepeer geselecteerde renners op ploeg, toon groepen van 2 of meer
+  Gebruik: Teambuilder inzicht
+
+Kapiteinspunten (later, score tracking):
+  Etappepunten renner × 2 (excl. trui- en teampunten)
+
+
+================================================================================
+4. FEATURES & USER STORIES
+================================================================================
+
+------------------------------------------------------------
+FEATURE 1 — RONDE- & ETAPPEBEHEER
+(Primair beheerder, leesbaar voor alle gebruikers)
+------------------------------------------------------------
+
+US-01 — Ronde aanmaken
+  Als beheerder wil ik een nieuwe grote ronde aanmaken (naam, jaar, budget)
+  zodat gebruikers hiervoor een team kunnen samenstellen.
+
+US-02 — Etappedata importeren/ophalen
+  Als beheerder wil ik etappedata automatisch ophalen van een externe bron
+  (bijv. ProCyclingStats), zodat ik niet alle 21 etappes handmatig hoef
+  in te voeren.
+
+  Acceptatiecriteria:
+  - Ophalen geeft minimaal: etappenummer, datum, start, finish, afstand,
+    terreintype
+  - Gefaalde of ontbrekende velden zijn handmatig te overschrijven
+  - Import via CSV/Excel als fallback
+
+US-03 — Etappeweging instellen
+  Als beheerder wil ik per etappe handmatig de gewichten per rennertype
+  kunnen instellen (GC / Sprinter / Sprint+ / Klimmer / Aanvaller /
+  Tijdrijder / Wildcard), zodat de parcoursanalyse klopt met mijn eigen
+  inschatting.
+
+  Acceptatiecriteria:
+  - Som van gewichten per etappe = 1.0 (validatie)
+  - App toont een voorstel op basis van terreintype (suggestie, niet dwingend)
+  - Tijdritflag activeert automatisch hoge Tijdrijder-weging als suggestie
+
+US-04 — Etappeoverzicht bekijken
+  Als gebruiker wil ik alle etappes van een ronde zien met hun profiel en
+  wegingsverdeling, zodat ik begrijp wat het parcours vraagt.
+
+------------------------------------------------------------
+FEATURE 2 — RENNERSDATABASE & EXTERNE DATA
+(Beheer door admin, leesbaar/selecteerbaar voor alle gebruikers)
+------------------------------------------------------------
+
+US-05 — Deelnemersveld ophalen
+  Als beheerder wil ik het deelnemersveld van een ronde automatisch ophalen
+  (naam, ploeg, prijs, Scorito-categorie), zodat gebruikers niet alles
+  handmatig hoeven in te voeren.
+
+  Acceptatiecriteria:
+  - Databron: Scorito-website (scraping) en/of ProCyclingStats
+  - Prijzen zijn ronde-specifiek (zelfde renner kan andere prijs per ronde)
+  - Mislukte ophaalpoging toont foutmelding + optie tot handmatige invoer
+
+US-06 — Rennertype handmatig aanpassen
+  Als beheerder wil ik het gebruiker_type van een renner kunnen overschrijven
+  (bijv. van "Klimmer" naar "Wildcard"), zodat de indeling overeenkomt met
+  mijn eigen analyse.
+
+US-07 — Renner handmatig toevoegen/bewerken
+  Als beheerder wil ik renners handmatig kunnen toevoegen of bewerken,
+  zodat ontbrekende of onjuiste data gecorrigeerd kan worden.
+
+US-08 — Renners bladeren & zoeken
+  Als gebruiker wil ik door het deelnemersveld kunnen bladeren, gefilterd
+  op ploeg, en zoeken op naam, zodat ik snel de juiste renner kan vinden
+  voor mijn team.
+
+  Acceptatiecriteria:
+  - Zoek op naam (live/typeahead)
+  - Filter op ploeg
+  - Zichtbaar per renner: naam, ploeg, prijs, gebruiker_type
+  - Nice to have: filter op type, sortering op prijs
+
+------------------------------------------------------------
+FEATURE 3 — TEAMBUILDER (PUZZELEN)
+(Kernfunctie — beschikbaar voor alle gebruikers)
+------------------------------------------------------------
+
+US-09 — Team aanmaken voor een ronde
+  Als gebruiker wil ik een nieuw team aanmaken voor een specifieke grote
+  ronde, zodat ik kan beginnen met puzzelen.
+
+US-10 — Renner toevoegen aan team
+  Als gebruiker wil ik een renner uit het deelnemersveld aan mijn team
+  toevoegen via zoeken op naam of bladeren per ploeg, zodat ik mijn
+  20-koppige selectie kan opbouwen.
+
+  Acceptatiecriteria:
+  - Team heeft exact 20 slots
+  - Renner kan slechts één keer geselecteerd worden
+  - Toevoegen lukt niet als budget wordt overschreden (harde constraint)
+  - Tabel toont per slot: naam, ploeg, prijs, type
+
+US-11 — Renner verwijderen uit team
+  Als gebruiker wil ik een renner uit mijn team kunnen verwijderen,
+  zodat ik mijn keuzes kan herzien.
+
+US-12 — Budgetbewaking
+  Als gebruiker wil ik continu kunnen zien hoeveel budget ik nog over heb,
+  zodat ik binnen de financiële constraint blijf.
+
+  Acceptatiecriteria:
+  - Resterend budget altijd zichtbaar (ook op mobiel)
+  - Visuele waarschuwing bij <10% budget resterend
+  - Blokkering bij overschrijding (niet stilzwijgend afwijzen)
+
+US-13 — Parcoursfit inzicht
+  Als gebruiker wil ik kunnen zien hoe mijn huidige teamsamenstelling
+  (per type) zich verhoudt tot de optimale verdeling op basis van de
+  parcoursanalyse, zodat ik informatief gestuurd word bij mijn keuzes.
+
+  Acceptatiecriteria:
+  - Toont per rennertype: optimaal aantal (berekend) vs. huidig aantal
+  - Visueel onderscheid tussen "op koers", "te weinig", "te veel"
+  - Informatief, niet blokkerend
+
+US-14 — Ploegsynergie inzicht
+  Als gebruiker wil ik kunnen zien welke renners in mijn team dezelfde
+  echte wielerploeg hebben, zodat ik de teampunten-potentie van mijn
+  selectie kan inschatten.
+
+  Acceptatiecriteria:
+  - Renners gegroepeerd per echte ploeg in het teamoverzicht
+  - Minimale weergave: ploegnaam + aantal renners van die ploeg in team
+
+------------------------------------------------------------
+FEATURE 4 — ETAPPE-OPSTELLING PLANNER
+(Uitbreiding op teambuilder — beschikbaar voor alle gebruikers)
+------------------------------------------------------------
+
+US-15 — Dagopstelling plannen
+  Als gebruiker wil ik per etappe kunnen aangeven welke renners uit mijn
+  20 ik verwacht op te stellen (de 9), zodat ik mijn tactische planning
+  kan vastleggen.
+
+  Acceptatiecriteria:
+  - Per etappe maximaal 9 renners selecteerbaar uit de eigen 20
+  - Overzicht als matrix (renners × etappes) of als per-etappe scherm
+  - Ploegentijdrit-flag: kopman selectie niet mogelijk die etappe
+
+US-16 — Kopman-kandidaat markeren
+  Als gebruiker wil ik per etappe één of meer renners kunnen markeren als
+  kopman-kandidaat, zodat ik mijn kapiteinsstrategie vooraf kan plannen.
+
+  Acceptatiecriteria:
+  - Maximaal 1 definitieve kopman per etappe
+  - Meerdere kandidaten markeren mag (ter overweging)
+  - Visuele indicator in de matrix/overzicht
+
+------------------------------------------------------------
+FEATURE 5 — SCORE TRACKING (Nice to have, buiten PoC)
+------------------------------------------------------------
+
+US-17 — Etapperesultaten invoeren
+  Als gebruiker wil ik na een etappe de uitslag en klassementsposities
+  kunnen invoeren, zodat de app mijn behaalde punten berekent.
+
+US-18 — Maximale score inzicht
+  Als gebruiker wil ik na een etappe kunnen zien wat mijn maximale score
+  had kunnen zijn bij een optimale opstelling, zodat ik van mijn keuzes
+  kan leren.
+
+------------------------------------------------------------
+FEATURE 6 — MEERDERE TEAMS / SCENARIO'S (Nice to have, buiten PoC)
+------------------------------------------------------------
+
+US-19 — Meerdere teams opslaan
+  Als gebruiker wil ik meerdere teamvarianten kunnen opslaan en naast
+  elkaar vergelijken, zodat ik scenario's kan afwegen vóór de definitieve
+  keuze.
+
+------------------------------------------------------------
+FEATURE 7 — AUTHENTICATIE & ROLLEN
+(Architectureel voorbereiden, niet bouwen in PoC)
+------------------------------------------------------------
+
+US-20 — Beheerderstoegang
+  Als beheerder wil ik exclusief toegang hebben tot databeheer-
+  functionaliteit (rondes/etappes/renners beheren), zodat gewone
+  gebruikers geen data kunnen beschadigen.
+
+  Architecturele eis:
+  Applicatie moet ontworpen worden met een duidelijke scheiding tussen
+  publieke en beheerder-routes, zodat authenticatie later toegevoegd
+  kan worden zonder volledige herbouw.
+
+
+================================================================================
+5. NON-FUNCTIONAL REQUIREMENTS
+================================================================================
+
+NF-01  Responsive
+       App is volledig bruikbaar op laptop én smartphone (minimaal 375px breed)
+
+NF-02  Performance
+       Teambuilder reageert binnen 300ms op gebruikersacties
+       (toevoegen/verwijderen renner)
+
+NF-03  Beschikbaarheid
+       Gehost op Netlify of vergelijkbare laagdrempelig platform;
+       geen server-beheer vereist
+
+NF-04  Data persistentie
+       Teamdata blijft bewaard tussen sessies (minimaal per browser,
+       bij voorkeur cloud-opslag)
+
+NF-05  Uitbreidbaarheid
+       Datamodel ondersteunt meerdere rondes en jaren zonder
+       structuurwijziging
+
+NF-06  Authenticatie-ready
+       Route-structuur en databeheer zijn opgezet met scheiding
+       publiek/admin, auth toe te voegen zonder refactor
+
+NF-07  Foutafhandeling extern
+       Externe datahaal-fouten resulteren in een duidelijke foutmelding
+       + handmatige fallback, nooit een stille crash
+
+NF-08  Data-integriteit
+       Budgetoverschrijding is technisch onmogelijk te bewaren
+       (niet alleen frontend-validatie)
+
+
+================================================================================
+6. AANBEVOLEN TECH STACK (PoC)
+================================================================================
+
+Frontend:        React + Vite
+                 Componentmodel past bij tabel/matrix UI; groot ecosysteem;
+                 snel op te zetten
+
+Styling:         Tailwind CSS
+                 Responsive zonder custom CSS overhead
+
+Backend/API:     Python (FastAPI)
+                 Snel, geschikt voor scraping-logica, goede async support
+
+Database:        PostgreSQL via Supabase
+                 Gratis tier, cloud-hosted, auth-ready voor later,
+                 geen server-beheer
+
+Externe data:    Python scraper (BeautifulSoup / Playwright)
+                 Flexibel voor PCS + Scorito, als geplande taak uitvoerbaar
+
+Hosting frontend: Netlify
+                 Gebruikersvoorkeur, directe GitHub-integratie
+
+Hosting backend: Railway of Render (gratis tier)
+                 Laagdrempelig, deployt vanuit GitHub
+
+
+================================================================================
+7. PoC SCOPE (MVP)
+================================================================================
+
+IN SCOPE PoC
+------------------------------------------------------------
+US-01  Ronde aanmaken (handmatig, Giro 2026)
+US-02  Etappedata ophalen extern (of CSV-import als fallback)
+US-03  Etappeweging instellen
+US-04  Etappeoverzicht bekijken
+US-05  Deelnemersveld ophalen extern
+US-06  Rennertype handmatig aanpassen
+US-07  Renner handmatig toevoegen/bewerken
+US-08  Renners zoeken & bladeren
+US-09  Team aanmaken voor een ronde
+US-10  Renner toevoegen aan team
+US-11  Renner verwijderen uit team
+US-12  Budgetbewaking (harde constraint)
+US-13  Parcoursfit inzicht (informatief)
+US-14  Ploegsynergie inzicht
+
+BUITEN PoC SCOPE (expliciet)
+------------------------------------------------------------
+US-15/16  Etappe-opstelling planner        → fase 2
+US-17/18  Score tracking                   → fase 3
+US-19     Meerdere scenario's              → fase 2
+US-20     Authenticatie & rollen           → fase 2 (architectureel voorbereid)
+          Geavanceerde filters & externe rennerstatistieken
+          Tour & Vuelta ondersteuning (datamodel klaar, UI niet)
+
+
+================================================================================
+8. DEFINITION OF DONE (PoC geslaagd als...)
+================================================================================
+
+"Ik kan een team van renners (en hun bijbehorende data) samenstellen en
+plotten tegen de etappes van de ronde en de harde constraints van het spel."
+
+Concreet betekent dit:
+  1. Deelnemersveld van de Giro 2026 is beschikbaar (opgehaald of geïmporteerd)
+  2. Etappedata Giro 2026 is beschikbaar met wegingen per rennertype
+  3. Ik kan 20 renners selecteren zonder het budget te overschrijden
+  4. Ik kan zien hoe mijn type-verdeling zich verhoudt tot de parcoursanalyse
+  5. Ik kan ploegsynergie in mijn team herkennen
+
+
+================================================================================
+EOF
+================================================================================

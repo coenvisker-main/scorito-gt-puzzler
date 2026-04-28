@@ -1,0 +1,848 @@
+[
+    {
+        "id": "jonas-vingegaard",
+        "naam": "VINGEGAARD Jonas",
+        "ploeg": "Team Visma | Lease a Bike",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 5500000,
+        "is_actief": true
+    },
+    {
+        "id": "jonathan-milan",
+        "naam": "MILAN Jonathan",
+        "ploeg": "Lidl - Trek",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 4000000,
+        "is_actief": true
+    },
+    {
+        "id": "richard-carapaz",
+        "naam": "CARAPAZ Richard",
+        "ploeg": "EF Education - EasyPost",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 3500000,
+        "is_actief": true
+    },
+    {
+        "id": "adam-yates",
+        "naam": "YATES Adam",
+        "ploeg": "UAE Team Emirates - XRG",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 3000000,
+        "is_actief": true
+    },
+    {
+        "id": "sepp-kuss",
+        "naam": "KUSS Sepp",
+        "ploeg": "Team Visma | Lease a Bike",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 3000000,
+        "is_actief": true
+    },
+    {
+        "id": "edoardo-affini",
+        "naam": "AFFINI Edoardo",
+        "ploeg": "Team Visma | Lease a Bike",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 2000000,
+        "is_actief": true
+    },
+    {
+        "id": "tobias-lund-andresen",
+        "naam": "ANDRESEN Tobias Lund",
+        "ploeg": "Decathlon CMA CGM Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 3500000,
+        "is_actief": true
+    },
+    {
+        "id": "egan-bernal",
+        "naam": "BERNAL Egan",
+        "ploeg": "Netcompany INEOS Cycling Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 1500000,
+        "is_actief": true
+    },
+    {
+        "id": "francesco-busatto",
+        "naam": "BUSATTO Francesco",
+        "ploeg": "Alpecin-Premier Tech",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "filippo-conca",
+        "naam": "CONCA Filippo",
+        "ploeg": "Team Jayco AlUla",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "filippo-ganna",
+        "naam": "GANNA Filippo",
+        "ploeg": "Netcompany INEOS Cycling Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 1500000,
+        "is_actief": true
+    },
+    {
+        "id": "tord-gudmestad",
+        "naam": "GUDMESTAD Tord",
+        "ploeg": "Decathlon CMA CGM Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "christian-scaroni",
+        "naam": "SCARONI Christian",
+        "ploeg": "XDS Astana Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 1000000,
+        "is_actief": true
+    },
+    {
+        "id": "lennert-van-eetvelt",
+        "naam": "VAN EETVELT Lennert",
+        "ploeg": "Lotto Intermarché",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 1000000,
+        "is_actief": true
+    },
+    {
+        "id": "danny-van-poppel",
+        "naam": "VAN POPPEL Danny",
+        "ploeg": "Red Bull - BORA - hansgrohe",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 1000000,
+        "is_actief": true
+    },
+    {
+        "id": "edoardo-zambanini",
+        "naam": "ZAMBANINI Edoardo",
+        "ploeg": "Bahrain - Victorious",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 750000,
+        "is_actief": true
+    },
+    {
+        "id": "ben-zwiehoff",
+        "naam": "ZWIEHOFF Ben",
+        "ploeg": "Red Bull - BORA - hansgrohe",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "samuele-battistella",
+        "naam": "BATTISTELLA Samuele",
+        "ploeg": "EF Education - EasyPost",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "derek-gee",
+        "naam": "GEE-WEST Derek",
+        "ploeg": "Lidl - Trek",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 3000000,
+        "is_actief": true
+    },
+    {
+        "id": "matevz-govekar",
+        "naam": "GOVEKAR Matevž",
+        "ploeg": "Bahrain - Victorious",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 1000000,
+        "is_actief": true
+    },
+    {
+        "id": "kaden-groves",
+        "naam": "GROVES Kaden",
+        "ploeg": "Alpecin-Premier Tech",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 2500000,
+        "is_actief": true
+    },
+    {
+        "id": "simone-gualdi",
+        "naam": "GUALDI Simone",
+        "ploeg": "Lotto Intermarché",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "jai-hindley",
+        "naam": "HINDLEY Jai",
+        "ploeg": "Red Bull - BORA - hansgrohe",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 2500000,
+        "is_actief": true
+    },
+    {
+        "id": "juan-pedro-lopez",
+        "naam": "LÓPEZ Juan Pedro",
+        "ploeg": "Movistar Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "luka-mezgec",
+        "naam": "MEZGEC Luka",
+        "ploeg": "Team Jayco AlUla",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "giulio-pellizzari",
+        "naam": "PELLIZZARI Giulio",
+        "ploeg": "Red Bull - BORA - hansgrohe",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 4500000,
+        "is_actief": true
+    },
+    {
+        "id": "nick-schultz",
+        "naam": "SCHULTZ Nick",
+        "ploeg": "NSN Cycling Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "manuele-tarozzi",
+        "naam": "TAROZZI Manuele",
+        "ploeg": "Bardiani CSF 7 Saber",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "casper-van-uden",
+        "naam": "VAN UDEN Casper",
+        "ploeg": "Team Picnic PostNL",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 1500000,
+        "is_actief": true
+    },
+    {
+        "id": "aleksandr-vlasov",
+        "naam": "VLASOV Aleksandr",
+        "ploeg": "Red Bull - BORA - hansgrohe",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 1000000,
+        "is_actief": true
+    },
+    {
+        "id": "max-walscheid",
+        "naam": "WALSCHEID Max",
+        "ploeg": "Lidl - Trek",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 750000,
+        "is_actief": true
+    },
+    {
+        "id": "thymen-arensman",
+        "naam": "ARENSMAN Thymen",
+        "ploeg": "Netcompany INEOS Cycling Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 2500000,
+        "is_actief": true
+    },
+    {
+        "id": "alberto-bettiol",
+        "naam": "BETTIOL Alberto",
+        "ploeg": "XDS Astana Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "koen-bouwman",
+        "naam": "BOUWMAN Koen",
+        "ploeg": "Team Jayco AlUla",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "victor-campenaerts",
+        "naam": "CAMPENAERTS Victor",
+        "ploeg": "Team Visma | Lease a Bike",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 1500000,
+        "is_actief": true
+    },
+    {
+        "id": "damiano-caruso",
+        "naam": "CARUSO Damiano",
+        "ploeg": "Bahrain - Victorious",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 1500000,
+        "is_actief": true
+    },
+    {
+        "id": "lorenzo-fortunato",
+        "naam": "FORTUNATO Lorenzo",
+        "ploeg": "XDS Astana Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 1500000,
+        "is_actief": true
+    },
+    {
+        "id": "alan-hatherly",
+        "naam": "HATHERLY Alan",
+        "ploeg": "Team Jayco AlUla",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "guillermo-juan-martinez",
+        "naam": "MARTINEZ Juan Guillermo",
+        "ploeg": "Team Picnic PostNL",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "gregor-muhlberger",
+        "naam": "MÜHLBERGER Gregor",
+        "ploeg": "Decathlon CMA CGM Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "oliver-naesen",
+        "naam": "NAESEN Oliver",
+        "ploeg": "Decathlon CMA CGM Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "alessandro-pinarello",
+        "naam": "PINARELLO Alessandro",
+        "ploeg": "NSN Cycling Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "darren-rafferty",
+        "naam": "RAFFERTY Darren",
+        "ploeg": "EF Education - EasyPost",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "einer-rubio",
+        "naam": "RUBIO Einer",
+        "ploeg": "Movistar Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 1500000,
+        "is_actief": true
+    },
+    {
+        "id": "dion-smith",
+        "naam": "SMITH Dion",
+        "ploeg": "NSN Cycling Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "pascal-ackermann",
+        "naam": "ACKERMANN Pascal",
+        "ploeg": "Team Jayco AlUla",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 1500000,
+        "is_actief": true
+    },
+    {
+        "id": "santiago-buitrago-sanchez",
+        "naam": "BUITRAGO Santiago",
+        "ploeg": "Bahrain - Victorious",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 1500000,
+        "is_actief": true
+    },
+    {
+        "id": "giulio-ciccone",
+        "naam": "CICCONE Giulio",
+        "ploeg": "Lidl - Trek",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 2000000,
+        "is_actief": true
+    },
+    {
+        "id": "david-de-la-cruz",
+        "naam": "DE LA CRUZ David",
+        "ploeg": "Pinarello Q36.5 Pro Cycling Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "dylan-groenewegen",
+        "naam": "GROENEWEGEN Dylan",
+        "ploeg": "Unibet Rose Rockets",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 2000000,
+        "is_actief": true
+    },
+    {
+        "id": "jhonatan-narvaez",
+        "naam": "NARVÁEZ Jhonatan",
+        "ploeg": "UAE Team Emirates - XRG",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 750000,
+        "is_actief": true
+    },
+    {
+        "id": "ben-o-connor",
+        "naam": "O'CONNOR Ben",
+        "ploeg": "Team Jayco AlUla",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 2000000,
+        "is_actief": true
+    },
+    {
+        "id": "nelson-oliveira",
+        "naam": "OLIVEIRA Nelson",
+        "ploeg": "Movistar Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "wout-poels",
+        "naam": "POELS Wout",
+        "ploeg": "Unibet Rose Rockets",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "elmar-reinders",
+        "naam": "REINDERS Elmar",
+        "ploeg": "Unibet Rose Rockets",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "mathys-rondel",
+        "naam": "RONDEL Mathys",
+        "ploeg": "Tudor Pro Cycling Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "michael-storer",
+        "naam": "STORER Michael",
+        "ploeg": "Tudor Pro Cycling Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 1000000,
+        "is_actief": true
+    },
+    {
+        "id": "ethan-vernon",
+        "naam": "VERNON Ethan",
+        "ploeg": "NSN Cycling Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 2000000,
+        "is_actief": true
+    },
+    {
+        "id": "jay-vine",
+        "naam": "VINE Jay",
+        "ploeg": "UAE Team Emirates - XRG",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 2000000,
+        "is_actief": true
+    },
+    {
+        "id": "filippo-zana",
+        "naam": "ZANA Filippo",
+        "ploeg": "Soudal Quick-Step",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "igor-arrieta-lizarraga",
+        "naam": "ARRIETA Igor",
+        "ploeg": "UAE Team Emirates - XRG",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "davide-ballerini",
+        "naam": "BALLERINI Davide",
+        "ploeg": "XDS Astana Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 750000,
+        "is_actief": true
+    },
+    {
+        "id": "felix-gall",
+        "naam": "GALL Felix",
+        "ploeg": "Decathlon CMA CGM Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 3500000,
+        "is_actief": true
+    },
+    {
+        "id": "wilco-kelderman",
+        "naam": "KELDERMAN Wilco",
+        "ploeg": "Team Visma | Lease a Bike",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 1500000,
+        "is_actief": true
+    },
+    {
+        "id": "timo-kielich",
+        "naam": "KIELICH Timo",
+        "ploeg": "Team Visma | Lease a Bike",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 1500000,
+        "is_actief": true
+    },
+    {
+        "id": "james-knox",
+        "naam": "KNOX James",
+        "ploeg": "Team Picnic PostNL",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "johannes-kulset",
+        "naam": "KULSET Johannes",
+        "ploeg": "Uno-X Mobility",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "bart-lemmen",
+        "naam": "LEMMEN Bart",
+        "ploeg": "Team Visma | Lease a Bike",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 1500000,
+        "is_actief": true
+    },
+    {
+        "id": "harold-martin-lopez",
+        "naam": "LÓPEZ Harold Martín",
+        "ploeg": "XDS Astana Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "mirco-maestri",
+        "naam": "MAESTRI Mirco",
+        "ploeg": "Team Polti VisitMalta",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "paul-magnier",
+        "naam": "MAGNIER Paul",
+        "ploeg": "Soudal Quick-Step",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 2000000,
+        "is_actief": true
+    },
+    {
+        "id": "antonio-morgado",
+        "naam": "MORGADO António",
+        "ploeg": "UAE Team Emirates - XRG",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "davide-piganzoli",
+        "naam": "PIGANZOLI Davide",
+        "ploeg": "Team Visma | Lease a Bike",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 2500000,
+        "is_actief": true
+    },
+    {
+        "id": "javier-romo",
+        "naam": "ROMO Javier",
+        "ploeg": "Movistar Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "alec-segaert",
+        "naam": "SEGAERT Alec",
+        "ploeg": "Bahrain - Victorious",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 750000,
+        "is_actief": true
+    },
+    {
+        "id": "anders-skaarseth",
+        "naam": "SKAARSETH Anders",
+        "ploeg": "Uno-X Mobility",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "jasper-stuyven",
+        "naam": "STUYVEN Jasper",
+        "ploeg": "Soudal Quick-Step",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "filippo-turconi",
+        "naam": "TURCONI Filippo",
+        "ploeg": "Bardiani CSF 7 Saber",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "michael-valgren-andersen",
+        "naam": "VALGREN Michael",
+        "ploeg": "EF Education - EasyPost",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "jan-christen",
+        "naam": "CHRISTEN Jan",
+        "ploeg": "UAE Team Emirates - XRG",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 1000000,
+        "is_actief": true
+    },
+    {
+        "id": "hartthijs-de-vries",
+        "naam": "DE VRIES Hartthijs",
+        "ploeg": "Unibet Rose Rockets",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "afonso-eulalio",
+        "naam": "EULÁLIO Afonso",
+        "ploeg": "Bahrain - Victorious",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "lorenzo-germani",
+        "naam": "GERMANI Lorenzo",
+        "ploeg": "Groupama - FDJ United",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "chris-harper",
+        "naam": "HARPER Chris",
+        "ploeg": "Pinarello Q36.5 Pro Cycling Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "enric-mas",
+        "naam": "MAS Enric",
+        "ploeg": "Movistar Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 2000000,
+        "is_actief": true
+    },
+    {
+        "id": "gianni-moscon",
+        "naam": "MOSCON Gianni",
+        "ploeg": "Red Bull - BORA - hansgrohe",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "liam-slock",
+        "naam": "SLOCK Liam",
+        "ploeg": "Lotto Intermarché",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "matteo-sobrero",
+        "naam": "SOBRERO Matteo",
+        "ploeg": "Lidl - Trek",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 750000,
+        "is_actief": true
+    },
+    {
+        "id": "marc-soler",
+        "naam": "SOLER Marc",
+        "ploeg": "UAE Team Emirates - XRG",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 1000000,
+        "is_actief": true
+    },
+    {
+        "id": "corbin-strong",
+        "naam": "STRONG Corbin",
+        "ploeg": "NSN Cycling Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 1000000,
+        "is_actief": true
+    },
+    {
+        "id": "diego-ulissi",
+        "naam": "ULISSI Diego",
+        "ploeg": "XDS Astana Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 750000,
+        "is_actief": true
+    },
+    {
+        "id": "frank-van-den-broek",
+        "naam": "VAN DEN BROEK Frank",
+        "ploeg": "Team Picnic PostNL",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    },
+    {
+        "id": "max-poole",
+        "naam": "POOLE Max",
+        "ploeg": "Team Picnic PostNL",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 2000000,
+        "is_actief": true
+    },
+    {
+        "id": "frederik-wandahl",
+        "naam": "WANDAHL Frederik",
+        "ploeg": "Red Bull - BORA - hansgrohe",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true
+    }
+]
