@@ -228,6 +228,13 @@ export function TeamProvider({ children }: { children: ReactNode }) {
     return false;
   }, [slots, selectRiderForSlot]);
 
+  const resetFormulaConfigs = useCallback(() => {
+    if (window.confirm("Weet je zeker dat je alle formule-instellingen (multipliers en D/End waarden) wilt terugzetten naar de standaard?")) {
+      setFormulaParams(giro2026.formulaParams);
+      setTypeConfigs(giro2026.typeConfigs);
+    }
+  }, []);
+
   const resetStageOverrides = useCallback(() => {
     if (window.confirm("Weet je zeker dat je alle handmatige etappe-aanpassingen wilt wissen en terug wilt naar de standaard-analyse?")) {
       setStageOverrides({});
@@ -253,6 +260,7 @@ export function TeamProvider({ children }: { children: ReactNode }) {
       getTypeStatus,
       resetTeam,
       resetStageOverrides,
+      resetFormulaConfigs,
       addRider
     }}>
       {children}

@@ -13,7 +13,7 @@ const RENNER_TYPES: RennerType[] = ['GC', 'Klimmer', 'Sprinter', 'Sprint+', 'Aan
 type SortKey = 'naam' | 'ploeg' | 'prijs' | 'type';
 
 export function AdminDashboard() {
-    const { resetStageOverrides } = useTeam();
+    const { resetStageOverrides, resetFormulaConfigs } = useTeam();
     const [ridersList, setRidersList] = useState<Renner[]>(initialRiders);
     const [isScraping, setIsScraping] = useState(false);
     const [scrapeStatus, setScrapeStatus] = useState<string | null>(null);
@@ -233,6 +233,15 @@ export function AdminDashboard() {
                     </div>
 
                     <div className="flex items-center gap-3">
+                        <button
+                            onClick={resetFormulaConfigs}
+                            className="flex items-center gap-3 px-6 py-3 rounded-xl font-black uppercase tracking-wider transition-all bg-neutral-800 text-neutral-300 border border-neutral-700 hover:bg-neutral-700 hover:scale-105"
+                            title="Reset alle formule-instellingen naar de nieuwe standaarden"
+                        >
+                            <Settings2 className="w-5 h-5" />
+                            Reset Formule
+                        </button>
+
                         <button
                             onClick={resetStageOverrides}
                             className="flex items-center gap-3 px-6 py-3 rounded-xl font-black uppercase tracking-wider transition-all bg-neutral-800 text-neutral-300 border border-neutral-700 hover:bg-neutral-700 hover:scale-105"
