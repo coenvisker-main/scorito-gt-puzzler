@@ -137,7 +137,14 @@ export function StartlistModal({ isOpen, onClose }: StartlistModalProps) {
                                             return (
                                                 <div key={rider.id} className="flex items-center justify-between px-3 py-2 gap-2 hover:bg-neutral-800/40 transition-colors group">
                                                     <div className="flex items-center gap-2 flex-1 min-w-0">
-                                                        <div className="font-medium text-white text-xs sm:text-sm truncate flex-1">{rider.naam}</div>
+                                                        <div className="font-medium text-white text-xs sm:text-sm truncate flex-1 flex items-center gap-2">
+                                                            {rider.naam}
+                                                            {rider.is_jongere && (
+                                                                <span className="shrink-0 w-4 h-4 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-[10px] font-black border border-blue-500/30" title="Jongerenklassement">
+                                                                    J
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                         <div className="text-[10px] sm:text-xs text-neutral-400 font-mono w-auto sm:w-20 shrink-0 bg-neutral-950/50 px-1.5 py-0.5 rounded text-right">
                                                             {formatMoney(rider.prijs)}
                                                         </div>
