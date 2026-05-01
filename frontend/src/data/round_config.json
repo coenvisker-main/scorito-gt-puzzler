@@ -1,17 +1,45 @@
 {
     "formulaParams": {
-        "alpha_mult": 1.0,
-        "beta_mult": 1.0,
-        "gamma_mult": 1.0,
-        "delta_mult": 1.0
+        "alpha_mult": 1,
+        "beta_mult": 1,
+        "gamma_mult": 1,
+        "delta_mult": 1
     },
     "typeConfigs": [
-        { "type": "GC", "daily_klassement_bonus": 8, "expected_eindklassement": 100 },
-        { "type": "Sprinter", "daily_klassement_bonus": 6, "expected_eindklassement": 60 },
-        { "type": "Sprint+", "daily_klassement_bonus": 4, "expected_eindklassement": 20 },
-        { "type": "Klimmer", "daily_klassement_bonus": 2, "expected_eindklassement": 20 },
-        { "type": "Aanvaller", "daily_klassement_bonus": 0, "expected_eindklassement": 2 },
-        { "type": "Tijdrijder", "daily_klassement_bonus": 0, "expected_eindklassement": 0 },
-        { "type": "Wildcard", "daily_klassement_bonus": 10, "expected_eindklassement": 24 }
+        {
+            "type": "GC",
+            "daily_klassement_bonus": 8,
+            "expected_eindklassement": 100
+        },
+        {
+            "type": "Sprinter",
+            "daily_klassement_bonus": 6,
+            "expected_eindklassement": 60
+        },
+        {
+            "type": "Sprint+",
+            "daily_klassement_bonus": 4,
+            "expected_eindklassement": 20
+        },
+        {
+            "type": "Klimmer",
+            "daily_klassement_bonus": 2,
+            "expected_eindklassement": 20
+        },
+        {
+            "type": "Aanvaller",
+            "daily_klassement_bonus": 0,
+            "expected_eindklassement": 2
+        },
+        {
+            "type": "Tijdrijder",
+            "daily_klassement_bonus": 0,
+            "expected_eindklassement": 0
+        },
+        {
+            "type": "Wildcard",
+            "daily_klassement_bonus": 4,
+            "expected_eindklassement": 20
+        }
     ]
 }

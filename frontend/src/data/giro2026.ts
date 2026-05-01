@@ -81,7 +81,7 @@ export const giro2026: Ronde = {
   id: 'giro-2026',
   naam: "Giro d'Italia",
   jaar: 2026,
-  budget: 52000000,
+  budget: 42000000,
   status: 'aankomend',
   etappes: etappes,
   renners: [],

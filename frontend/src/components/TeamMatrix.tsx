@@ -41,24 +41,33 @@ const SYNERGY_COLORS = [
 type SortField = 'name' | 'team' | 'price' | 'type' | 'default';
 
 export function TeamMatrix({ stages }: TeamMatrixProps) {
-  const { 
-    slots, 
-    budgetUsed, 
-    maxBudget, 
-    updateSlot, 
-    selectRiderForSlot, 
-    clearSlot, 
-    toggleLineup,
-    getOptimalDistribution,
-    resetTeam 
-  } = useTeam();
+    const { 
+        slots, 
+        budgetUsed, 
+        maxBudget, 
+        maxAffordablePrice,
+        updateSlot, 
+        selectRiderForSlot, 
+        clearSlot, 
+        toggleLineup,
+        getOptimalDistribution,
+        resetTeam 
+    } = useTeam();
 
-  const [sortField, setSortField] = useState<SortField>('default');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+    const [sortField, setSortField] = useState<SortField>('default');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const isOverBudget = budgetUsed > maxBudget;
-  const activeRidersCount = slots.filter(s => s.name.trim() !== '').length;
+    const isOverBudget = budgetUsed > maxBudget;
+    const activeRidersCount = slots.filter(s => s.name.trim() !== '').length;
+    const remainingSlots = 20 - activeRidersCount;
+    const remainingBudget = maxBudget - budgetUsed;
+    const avgPerSlot = remainingSlots > 0 ? remainingBudget / remainingSlots : 0;
+    const budgetPercentage = Math.min(100, (budgetUsed / maxBudget) * 100);
+
+    const formatMoney = (val: number) => {
+        return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(val);
+    };
 
   // US-14: Identify team synergy
   const teamSynergy = useMemo(() => {
@@ -129,45 +138,67 @@ export function TeamMatrix({ stages }: TeamMatrixProps) {
     <div className="flex flex-col space-y-4 pb-48 max-w-7xl mx-auto">
       {/* Top Stats & Distribution Bar */}
       <div className="flex flex-col gap-4">
-        <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-2xl flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="flex items-center gap-12">
-                <div className="flex flex-col">
-                  <span className="text-[10px] uppercase font-black text-neutral-400 tracking-[0.2em] mb-1">Puzzel Budget</span>
-                  <div className={`flex items-center gap-2 text-3xl font-black italic tracking-tighter ${isOverBudget ? 'text-red-500' : 'text-amber-500'}`}>
-                    <Euro className="w-6 h-6" />
-                    &euro;{(budgetUsed / 1000000).toFixed(1)}M<span className="text-neutral-500 text-sm font-bold ml-1 font-sans not-italic">/ 52M</span>
-                  </div>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-neutral-900 border border-neutral-800 p-6 rounded-2xl shadow-2xl overflow-hidden relative">
+            {/* Background Accent */}
+            <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none">
+                <Euro className="w-32 h-32 rotate-12" />
+            </div>
+
+            <div className="flex-1 space-y-4 relative z-10">
+                <div className="flex justify-between items-end mb-1">
+                    <div>
+                        <h3 className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] mb-1">Budget Beheer</h3>
+                        <div className="flex items-baseline gap-2">
+                            <span className={`text-3xl font-black italic tracking-tighter ${isOverBudget ? 'text-red-500' : 'text-white'}`}>
+                                {formatMoney(budgetUsed)}
+                            </span>
+                            <span className="text-neutral-500 text-sm font-bold">/ {formatMoney(maxBudget)}</span>
+                        </div>
+                    </div>
+                    <div className="text-right">
+                        <h3 className="text-[10px] font-black text-neutral-500 uppercase tracking-widest mb-1">Resterend per plek</h3>
+                        <span className={`text-sm font-black italic ${avgPerSlot < 500000 ? 'text-red-500 animate-pulse' : avgPerSlot < 750000 ? 'text-amber-500' : 'text-emerald-400'}`}>
+                            {formatMoney(avgPerSlot)}
+                        </span>
+                    </div>
                 </div>
-                <div className="w-px h-12 bg-neutral-800 hidden md:block"></div>
-                <div className="flex flex-col">
-                  <span className="text-[10px] uppercase font-black text-neutral-400 tracking-[0.2em] mb-1">Aantal Selectie</span>
-                  <div className={`flex items-center gap-2 text-3xl font-black italic tracking-tighter ${activeRidersCount === 20 ? 'text-emerald-500' : 'text-white'}`}>
-                    <Users className="w-6 h-6 text-neutral-500" />
-                    {activeRidersCount}<span className="text-neutral-500 text-sm font-bold ml-1 font-sans not-italic">/ 20</span>
-                  </div>
+                
+                {/* Progress Bar */}
+                <div className="h-2 w-full bg-neutral-800 rounded-full overflow-hidden border border-neutral-700/50 shadow-inner">
+                    <div 
+                        className={`h-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(0,0,0,0.5)] ${
+                            isOverBudget ? 'bg-red-500' : 
+                            budgetPercentage > 95 ? 'bg-amber-500' : 
+                            'bg-emerald-500'
+                        }`}
+                        style={{ width: `${budgetPercentage}%` }}
+                    />
+                </div>
+
+                <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
+                    <span className="text-neutral-500">{activeRidersCount} / 20 renners</span>
+                    {remainingBudget >= 0 ? (
+                        <span className="text-emerald-500">Nog {formatMoney(remainingBudget)} over</span>
+                    ) : (
+                        <span className="text-red-500">{formatMoney(Math.abs(remainingBudget))} overschreden</span>
+                    )}
                 </div>
             </div>
 
-            <div className="flex items-center gap-4">
-                {isOverBudget && (
-                    <div className="flex items-center gap-2.5 px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/20 rounded-xl text-[11px] font-black uppercase tracking-widest animate-pulse shadow-lg shadow-red-500/5">
-                        <AlertCircle className="w-4 h-4" />
-                        Budget Overschreden
-                    </div>
-                )}
+            <div className="flex items-center gap-3 relative z-10">
                 <button 
                     onClick={() => setIsModalOpen(true)}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-xl text-[12px] font-black uppercase tracking-wider hover:bg-emerald-500 hover:text-white transition-all transform hover:scale-[1.02] active:scale-95 shadow-[0_0_15px_rgba(16,185,129,0.15)]"
+                    className="flex items-center gap-2 px-6 py-3 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-xl text-[12px] font-black uppercase tracking-wider hover:bg-emerald-500 hover:text-white transition-all transform hover:scale-[1.02] active:scale-95 shadow-lg shadow-emerald-500/10"
                 >
-                    <ListPlus className="w-4 h-4" />
-                    Open Startlijst
+                    <ListPlus className="w-5 h-5" />
+                    Startlijst
                 </button>
                 <button 
                     onClick={resetTeam}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-neutral-800 text-neutral-300 border border-neutral-700 rounded-xl text-[12px] font-black uppercase tracking-wider hover:bg-neutral-700 hover:text-white transition-all transform hover:scale-[1.02] active:scale-95"
+                    className="flex items-center gap-2 px-6 py-3 bg-neutral-800 text-neutral-300 border border-neutral-700 rounded-xl text-[12px] font-black uppercase tracking-wider hover:bg-neutral-700 hover:text-white transition-all transform hover:scale-[1.02] active:scale-95"
                 >
-                    <Trash2 className="w-4 h-4" />
-                    Reset Team
+                    <Trash2 className="w-5 h-5" />
+                    Reset
                 </button>
             </div>
         </div>

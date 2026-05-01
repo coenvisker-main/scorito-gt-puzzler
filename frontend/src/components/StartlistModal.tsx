@@ -11,7 +11,7 @@ interface StartlistModalProps {
 
 export function StartlistModal({ isOpen, onClose }: StartlistModalProps) {
     const [searchTerm, setSearchTerm] = useState('');
-    const { slots, addRider } = useTeam();
+    const { slots, addRider, maxAffordablePrice } = useTeam();
 
     // Reset inner state when modal opens
     useEffect(() => {
@@ -133,9 +133,10 @@ export function StartlistModal({ isOpen, onClose }: StartlistModalProps) {
                                     <div className="divide-y divide-neutral-800/50 bg-neutral-900/20">
                                         {group.riders.map(rider => {
                                             const isAlreadyInTeam = slots.some(r => r.name === rider.naam && r.name !== '');
+                                            const isTooExpensive = !isAlreadyInTeam && rider.prijs > maxAffordablePrice;
 
                                             return (
-                                                <div key={rider.id} className="flex items-center justify-between px-3 py-2 gap-2 hover:bg-neutral-800/40 transition-colors group">
+                                                <div key={rider.id} className={`flex items-center justify-between px-3 py-2 gap-2 hover:bg-neutral-800/40 transition-colors group ${isTooExpensive ? 'opacity-40 grayscale-[0.5]' : ''}`}>
                                                     <div className="flex items-center gap-2 flex-1 min-w-0">
                                                         <div className="font-medium text-white text-xs sm:text-sm truncate flex-1 flex items-center gap-2">
                                                             {rider.naam}
@@ -144,8 +145,11 @@ export function StartlistModal({ isOpen, onClose }: StartlistModalProps) {
                                                                     J
                                                                 </span>
                                                             )}
+                                                            {isTooExpensive && (
+                                                                <span className="text-[8px] font-bold text-red-500 uppercase tracking-tighter border border-red-500/30 px-1 rounded">Onbetaalbaar</span>
+                                                            )}
                                                         </div>
-                                                        <div className="text-[10px] sm:text-xs text-neutral-400 font-mono w-auto sm:w-20 shrink-0 bg-neutral-950/50 px-1.5 py-0.5 rounded text-right">
+                                                        <div className={`text-[10px] sm:text-xs font-mono w-auto sm:w-20 shrink-0 px-1.5 py-0.5 rounded text-right ${isTooExpensive ? 'text-red-400 bg-red-950/20' : 'text-neutral-400 bg-neutral-950/50'}`}>
                                                             {formatMoney(rider.prijs)}
                                                         </div>
                                                         <div className="shrink-0 w-8 flex justify-center">
@@ -160,19 +164,19 @@ export function StartlistModal({ isOpen, onClose }: StartlistModalProps) {
                                                                 disabled
                                                                 className="flex items-center justify-center gap-1 w-full sm:w-auto px-2 py-1 rounded text-[10px] font-bold bg-neutral-950 text-neutral-600 cursor-not-allowed border border-neutral-800"
                                                             >
-                                                                <Check size={12} /> <span className="hidden sm:inline">Toegevoegd</span>
+                                                                 <Check size={12} /> <span className="hidden sm:inline">Toegevoegd</span>
                                                             </button>
                                                         ) : (
                                                             <button
                                                                 onClick={() => addRider(rider)}
-                                                                disabled={isTeamFull}
+                                                                disabled={isTeamFull || isTooExpensive}
                                                                 className={`flex items-center justify-center gap-1 w-full sm:w-auto px-2 py-1 rounded text-[10px] font-bold transition-all border active:scale-95 ${
-                                                                    isTeamFull 
+                                                                    (isTeamFull || isTooExpensive)
                                                                     ? 'bg-neutral-900 text-neutral-600 border-neutral-800 cursor-not-allowed'
                                                                     : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
                                                                 }`}
                                                             >
-                                                                <Plus size={12} /> <span className="hidden sm:inline">Kies</span>
+                                                                <Plus size={12} /> <span className="hidden sm:inline">{isTooExpensive ? 'Te Duur' : 'Kies'}</span>
                                                             </button>
                                                         )}
                                                     </div>

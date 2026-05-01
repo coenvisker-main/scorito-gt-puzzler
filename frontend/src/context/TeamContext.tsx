@@ -7,6 +7,7 @@ interface TeamContextType {
   slots: TeamSlot[];
   budgetUsed: number;
   maxBudget: number;
+  maxAffordablePrice: number;
   stageOverrides: Record<number, RennerTypeWeging[]>;
   updateSlot: (id: string, field: keyof TeamSlot, value: any) => void;
   selectRiderForSlot: (id: string, rider: Renner) => void;
@@ -25,8 +26,9 @@ interface TeamContextType {
 
 const TeamContext = createContext<TeamContextType | undefined>(undefined);
 
-const MAX_BUDGET = 52000000;
+const MAX_BUDGET = giro2026.budget;
 const SLOTS_COUNT = 20;
+const MIN_RIDER_PRICE = 500000;
 
 const generateId = (index: number) => `slot-${index}`;
 
@@ -124,8 +126,20 @@ export function TeamProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('scorito_gt_type_configs', JSON.stringify(typeConfigs));
   }, [typeConfigs]);
 
-  const budgetUsed = useMemo(() => {
-    return slots.reduce((sum, slot) => sum + (Number(slot.price) || 0), 0);
+  const { budgetUsed, maxAffordablePrice } = useMemo(() => {
+    const used = slots.reduce((sum, slot) => sum + (Number(slot.price) || 0), 0);
+    const emptySlotsCount = slots.filter(s => !s.name || s.name.trim() === '').length;
+    
+    // Max we can spend on ONE rider is: Remaining Budget - (Remaining Slots - 1) * 500k
+    const remainingBudget = MAX_BUDGET - used;
+    const affordable = emptySlotsCount > 0 
+      ? remainingBudget - (emptySlotsCount - 1) * MIN_RIDER_PRICE 
+      : 0;
+
+    return { 
+      budgetUsed: used, 
+      maxAffordablePrice: Math.max(0, affordable) 
+    };
   }, [slots]);
 
   const updateSlot = useCallback((id: string, field: keyof TeamSlot, value: any) => {
@@ -246,6 +260,7 @@ export function TeamProvider({ children }: { children: ReactNode }) {
       slots,
       budgetUsed,
       maxBudget: MAX_BUDGET,
+      maxAffordablePrice,
       stageOverrides,
       updateSlot,
       selectRiderForSlot,

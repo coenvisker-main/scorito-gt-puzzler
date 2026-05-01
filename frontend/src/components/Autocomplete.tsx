@@ -16,16 +16,20 @@ export function Autocomplete({ value, options, onSelect, onChange, onClear, plac
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const { getTypeStatus } = useTeam();
+  const { getTypeStatus, maxAffordablePrice, slots } = useTeam();
 
   const filteredOptions = useMemo(() => {
     if (!value || value.length < 2) return [];
     const search = value.toLowerCase();
+    
+    // Also check if already in team to avoid double showing
+    const existingNames = new Set(slots.map(s => s.name));
+
     return options.filter(opt => 
-      opt.naam.toLowerCase().includes(search) || 
-      opt.ploeg.toLowerCase().includes(search)
+      (opt.naam.toLowerCase().includes(search) || opt.ploeg.toLowerCase().includes(search)) &&
+      !existingNames.has(opt.naam)
     ).slice(0, 10);
-  }, [value, options]);
+  }, [value, options, slots]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -88,24 +92,33 @@ export function Autocomplete({ value, options, onSelect, onChange, onClear, plac
         <div className="absolute z-[100] left-0 right-0 mt-1 bg-neutral-900 border border-neutral-700 rounded-lg shadow-2xl overflow-hidden max-h-60 overflow-y-auto ring-1 ring-black">
           {filteredOptions.map((opt, i) => {
             const status = getTypeStatus(opt.gebruiker_type || 'Wildcard');
+            const isTooExpensive = opt.prijs > maxAffordablePrice;
+
             return (
               <div
                 key={opt.id}
                 onMouseDown={(e) => e.preventDefault()}
-                className={`px-3 py-2 cursor-pointer flex justify-between items-center transition-colors border-b border-neutral-800/50 last:border-0 ${
-                  i === highlightedIndex ? 'bg-amber-500 text-neutral-950 font-bold' : 'text-neutral-200 hover:bg-neutral-800'
+                className={`px-3 py-2 flex justify-between items-center transition-colors border-b border-neutral-800/50 last:border-0 ${
+                    isTooExpensive 
+                        ? 'opacity-40 grayscale-[0.5] cursor-not-allowed bg-neutral-950/20' 
+                        : i === highlightedIndex ? 'bg-amber-500 text-neutral-950 font-bold cursor-pointer' : 'text-neutral-200 hover:bg-neutral-800 cursor-pointer'
                 }`}
                 onClick={() => {
-                  onSelect(opt);
-                  setIsOpen(false);
+                  if (!isTooExpensive) {
+                    onSelect(opt);
+                    setIsOpen(false);
+                  }
                 }}
-                onMouseEnter={() => setHighlightedIndex(i)}
+                onMouseEnter={() => !isTooExpensive && setHighlightedIndex(i)}
               >
                 <div className="min-w-0 flex-1">
                   <div className="text-xs truncate tracking-tight font-black flex items-center gap-1">
                     {opt.naam}
                     {opt.is_jongere && (
                       <span className={`text-sm ${i === highlightedIndex ? 'text-neutral-900' : 'text-amber-500'}`}>*</span>
+                    )}
+                    {isTooExpensive && (
+                        <span className="text-[8px] bg-red-500/20 text-red-500 border border-red-500/30 px-1 rounded ml-1">TE DUUR</span>
                     )}
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
@@ -121,7 +134,7 @@ export function Autocomplete({ value, options, onSelect, onChange, onClear, plac
                     </span>
                   </div>
                 </div>
-                <div className={`text-[11px] font-mono font-black ml-2 ${i === highlightedIndex ? 'text-neutral-950' : 'text-amber-500'}`}>
+                <div className={`text-[11px] font-mono font-black ml-2 ${isTooExpensive ? 'text-red-500' : i === highlightedIndex ? 'text-neutral-950' : 'text-amber-500'}`}>
                   &euro;{(opt.prijs / 1000000).toFixed(1)}M
                 </div>
               </div>
