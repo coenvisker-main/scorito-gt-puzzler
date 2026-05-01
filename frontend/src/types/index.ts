@@ -27,6 +27,7 @@ export interface Renner {
   gebruiker_type: RennerType;
   prijs: number;
   is_actief: boolean;
+  is_jongere: boolean;
 }
 
 // Lineup state for a single stage
@@ -42,6 +43,19 @@ export interface TeamSlot {
   lineup: Record<number, LineupStatus>; // stageNumber -> status
 }
 
+export interface FormulaParams {
+  alpha_mult: number;
+  beta_mult: number;
+  gamma_mult: number;
+  delta_mult: number;
+}
+
+export interface TypeConfig {
+  type: RennerType;
+  daily_klassement_bonus: number;
+  expected_eindklassement: number;
+}
+
 export interface Ronde {
   id: string;
   naam: string;
@@ -50,4 +64,6 @@ export interface Ronde {
   status: 'aankomend' | 'actief' | 'afgelopen';
   etappes: Etappe[];
   renners: Renner[];
+  formulaParams: FormulaParams;
+  typeConfigs: TypeConfig[];
 }

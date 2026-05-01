@@ -240,6 +240,9 @@ export function TeamMatrix({ stages }: TeamMatrixProps) {
                           onSelect={(rider) => selectRiderForSlot(slot.id, rider)}
                           onClear={() => clearSlot(slot.id)}
                         />
+                        {allRiders.find(r => r.naam === slot.name)?.is_jongere && (
+                          <span className="text-amber-500 font-black text-sm" title="Jongerenklassement">*</span>
+                        )}
                         {hasRider && (
                           <div className="flex-shrink-0 w-4 h-4 flex items-center justify-center rounded-full bg-neutral-800 border border-neutral-700 text-[9px] font-black text-neutral-300 group-hover/row:text-amber-500 group-hover/row:border-amber-500/50 transition-all cursor-help" title="In ritten geselecteerd">
                             {stageCount}

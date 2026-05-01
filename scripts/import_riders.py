@@ -75,6 +75,9 @@ def scrape_pcs():
             
             rider_id = a_rider['href'].replace('rider/', '')
             
+            # Check for youth GC indicator (*)
+            is_youth = "*" in li.text
+            
             # Default fallback for completely new riders
             price = 500000
             gtype = "Wildcard"
@@ -86,6 +89,9 @@ def scrape_pcs():
                 price = existing.get("prijs", 500000)
                 gtype = existing.get("gebruiker_type", "Wildcard")
                 scat = existing.get("scorito_categorie", "Onbekend")
+                # If scraper didn't find asterisk but existing record says they are youth, keep it
+                if not is_youth:
+                    is_youth = existing.get("is_jongere", False)
 
             riders.append({
                 "id": rider_id,
@@ -94,7 +100,8 @@ def scrape_pcs():
                 "scorito_categorie": scat, 
                 "gebruiker_type": gtype,    
                 "prijs": price,
-                "is_actief": True
+                "is_actief": True,
+                "is_jongere": is_youth
             })
             
     return riders

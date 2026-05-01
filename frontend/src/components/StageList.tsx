@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Ronde, RennerTypeWeging, RennerType } from '../types';
+import { Ronde, RennerType } from '../types';
 import { useTeam } from '../context/TeamContext';
-import { Mountain, ArrowRight, Timer, Map, Layers, Check, X, Info, Trophy, Eye } from 'lucide-react';
+import { calculateRecommendedCaptain } from '../utils/formulaUtils';
+import { Mountain, ArrowRight, Timer, Map, Layers, Info, Trophy, Eye } from 'lucide-react';
 import { StageProfileModal } from './StageProfileModal';
 import { DistributionSummary } from './DistributionSummary';
 
@@ -9,7 +10,7 @@ interface StageListProps {
   ronde: Ronde;
 }
 
-const RENNER_TYPES: RennerType[] = ['GC', 'Klimmer', 'Sprinter', 'Sprint+', 'Aanvaller', 'Tijdrijder', 'Wildcard'];
+
 
 function getTerreinStyles(terreintype: string) {
   if (terreintype === 'bergen') return 'bg-red-500/20 text-red-300 border-red-500/30';
@@ -76,9 +77,9 @@ export function StageList({ ronde }: StageListProps) {
       </div>
 
       {/* Live Distribution Summary */}
-      <DistributionSummary />
+      <DistributionSummary hideComparison={true} />
 
-      <div className="bg-neutral-900 rounded-xl border border-neutral-800 shadow-2xl overflow-hidden">
+      <div className="bg-neutral-900 rounded-xl border border-neutral-800 shadow-2xl overflow-hidden hidden lg:block">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -89,7 +90,7 @@ export function StageList({ ronde }: StageListProps) {
                 <th className="px-6 py-4 text-right">Afstand</th>
                 <th className="px-6 py-4 text-right">Hoogte</th>
                 <th className="px-6 py-4 text-center">Type</th>
-                <th className="px-6 py-4">Wegingen</th>
+                <th className="px-6 py-4">Kopman Advies</th>
                 <th className="px-6 py-4 text-right">Actie</th>
               </tr>
             </thead>
@@ -132,15 +133,17 @@ export function StageList({ ronde }: StageListProps) {
                         {etappe.terreintype}
                       </span>
                     </td>
-                    <td className="px-6 py-4 min-w-[200px]">
-                        <div className="flex flex-wrap gap-1.5">
-                          {weights.filter(w => w.gewicht > 0).map(w => (
-                            <div key={w.type} className={`flex items-center gap-1 px-1.5 py-0.5 rounded border transition-opacity ${totalWeight > 1 ? 'bg-amber-500/10 border-amber-500/20 opacity-100' : 'bg-neutral-800 border-neutral-700/50 opacity-60'}`}>
-                              <span className="text-[8px] font-black text-neutral-400 uppercase">{w.type.substring(0, 3)}</span>
-                              <span className="text-[10px] font-black text-white">{(w.gewicht * 100).toFixed(0)}%</span>
-                            </div>
-                          ))}
-                        </div>
+                    <td className="px-6 py-4">
+                      {(() => {
+                        const rec = calculateRecommendedCaptain(weights);
+                        if (!rec) return <span className="text-neutral-700 text-[10px]">-</span>;
+                        return (
+                          <div className="flex flex-col">
+                            <span className="text-[11px] font-black text-amber-500 uppercase tracking-tighter">{rec.type}</span>
+                            <span className="text-[9px] text-neutral-500 font-bold">{(rec.weight * 100).toFixed(0)}% kans</span>
+                          </div>
+                        );
+                      })()}
                     </td>
                     <td className="px-6 py-4 text-right">
                           <button 
@@ -161,6 +164,64 @@ export function StageList({ ronde }: StageListProps) {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="grid grid-cols-1 gap-4 lg:hidden">
+        {ronde.etappes.map((etappe) => {
+          const weights = stageOverrides[etappe.nummer] || etappe.wegingen;
+          return (
+            <div 
+              key={etappe.nummer} 
+              className="bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden shadow-lg active:scale-[0.98] transition-all"
+              onClick={() => setActiveStageNum(etappe.nummer)}
+            >
+              <div className="p-4 flex flex-col gap-3">
+                <div className="flex justify-between items-start">
+                  <div className="flex items-center gap-3">
+                    <span className="w-8 h-8 flex items-center justify-center bg-neutral-950 rounded-lg text-xs font-black text-amber-500 border border-neutral-800">
+                      {etappe.nummer}
+                    </span>
+                    <div>
+                      <div className="text-[10px] text-neutral-500 font-black uppercase tracking-widest leading-none mb-1">
+                        {new Date(etappe.datum).toLocaleDateString('nl-NL', { day: '2-digit', month: 'short' })}
+                      </div>
+                      <div className={`inline-block px-2 py-0.5 rounded border text-[8px] font-black uppercase tracking-tighter ${getTerreinStyles(etappe.terreintype)}`}>
+                        {etappe.terreintype}
+                      </div>
+                    </div>
+                  </div>
+                  <button className="p-2 bg-neutral-800 rounded-lg text-neutral-400">
+                    <Eye className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2 text-sm font-black text-white italic tracking-tight">
+                  <span className="truncate">{etappe.startplaats}</span>
+                  <ArrowRight className="w-3 h-3 text-neutral-700 shrink-0" />
+                  <span className="truncate">{etappe.finishplaats}</span>
+                </div>
+
+                <div className="flex items-center justify-between mt-1">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-[10px] font-black text-neutral-500 uppercase tracking-tight">Focus:</span>
+                    <span className="text-xs font-black text-white uppercase italic">{etappe.terreintype}</span>
+                  </div>
+                  {(() => {
+                    const rec = calculateRecommendedCaptain(weights);
+                    if (!rec) return null;
+                    return (
+                      <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 px-2 py-1 rounded-lg">
+                         <span className="text-[8px] font-black text-amber-500/60 uppercase">Kopman</span>
+                         <span className="text-[11px] font-black text-amber-500 uppercase italic tracking-tighter">{rec.type}</span>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
       
       <StageProfileModal

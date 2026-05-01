@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback } from 'react';
-import { TeamSlot, Renner, LineupStatus, RennerType, RennerTypeWeging } from '../types';
+import { TeamSlot, Renner, LineupStatus, RennerType, RennerTypeWeging, FormulaParams, TypeConfig } from '../types';
 import { giro2026 } from '../data/giro2026';
+import { calculateOptimalDistribution } from '../utils/formulaUtils';
 
 interface TeamContextType {
   slots: TeamSlot[];
@@ -12,7 +13,12 @@ interface TeamContextType {
   clearSlot: (id: string) => void;
   toggleLineup: (id: string, stageNumber: number) => void;
   updateStageWeights: (stageNumber: number, weights: RennerTypeWeging[]) => void;
-  getOptimalDistribution: () => Record<RennerType, number>;
+  getOptimalDistribution: () => { slots: Record<RennerType, number>, tcsScores: Record<RennerType, number>, components: any };
+  getTypeStatus: (type: RennerType) => 'under' | 'ok' | 'over';
+  formulaParams: FormulaParams;
+  typeConfigs: TypeConfig[];
+  updateFormulaParams: (params: FormulaParams) => void;
+  updateTypeConfigs: (configs: TypeConfig[]) => void;
   resetTeam: () => void;
   addRider: (rider: Renner) => boolean;
 }
@@ -66,9 +72,41 @@ const getInitialOverrides = () => {
     return {};
 };
 
+const getInitialFormulaParams = (): FormulaParams => {
+    const saved = localStorage.getItem('scorito_gt_formula_params');
+    if (saved) {
+        try { 
+            const parsed = JSON.parse(saved);
+            // Migration: if we have the old keys, convert them
+            if ('alpha' in parsed) {
+                return {
+                    alpha_mult: 1.0,
+                    beta_mult: 1.0,
+                    gamma_mult: 1.0,
+                    delta_mult: 1.0
+                };
+            }
+            return parsed; 
+        } catch (e) { 
+            console.error(e); 
+        }
+    }
+    return giro2026.formulaParams;
+};
+
+const getInitialTypeConfigs = () => {
+    const saved = localStorage.getItem('scorito_gt_type_configs');
+    if (saved) {
+        try { return JSON.parse(saved); } catch (e) { console.error(e); }
+    }
+    return giro2026.typeConfigs;
+};
+
 export function TeamProvider({ children }: { children: ReactNode }) {
   const [slots, setSlots] = useState<TeamSlot[]>(getInitialSlots);
   const [stageOverrides, setStageOverrides] = useState<Record<number, RennerTypeWeging[]>>(getInitialOverrides);
+  const [formulaParams, setFormulaParams] = useState<FormulaParams>(getInitialFormulaParams);
+  const [typeConfigs, setTypeConfigs] = useState<TypeConfig[]>(getInitialTypeConfigs);
 
   useEffect(() => {
     localStorage.setItem('scorito_gt_slots', JSON.stringify(slots));
@@ -77,6 +115,14 @@ export function TeamProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     localStorage.setItem('scorito_gt_overrides', JSON.stringify(stageOverrides));
   }, [stageOverrides]);
+
+  useEffect(() => {
+    localStorage.setItem('scorito_gt_formula_params', JSON.stringify(formulaParams));
+  }, [formulaParams]);
+
+  useEffect(() => {
+    localStorage.setItem('scorito_gt_type_configs', JSON.stringify(typeConfigs));
+  }, [typeConfigs]);
 
   const budgetUsed = useMemo(() => {
     return slots.reduce((sum, slot) => sum + (Number(slot.price) || 0), 0);
@@ -140,27 +186,30 @@ export function TeamProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const getOptimalDistribution = useCallback(() => {
-    const totals: Record<RennerType, number> = {
-        'GC': 0, 'Klimmer': 0, 'Sprinter': 0, 'Sprint+': 0, 'Aanvaller': 0, 'Tijdrijder': 0, 'Wildcard': 0
-    };
-    let globalSum = 0;
+    return calculateOptimalDistribution(
+        giro2026.etappes,
+        stageOverrides,
+        formulaParams,
+        typeConfigs
+    );
+  }, [stageOverrides, formulaParams, typeConfigs]);
 
-    giro2026.etappes.forEach(stage => {
-        const weights = stageOverrides[stage.nummer] || stage.wegingen;
-        weights.forEach(w => {
-            totals[w.type] += w.gewicht;
-            globalSum += w.gewicht;
-        });
-    });
+  const updateFormulaParams = useCallback((params: FormulaParams) => {
+    setFormulaParams(params);
+  }, []);
 
-    const distribution: any = {};
-    Object.keys(totals).forEach(key => {
-        const type = key as RennerType;
-        distribution[type] = globalSum > 0 ? (totals[type] / globalSum) * 20 : 0;
-    });
+  const updateTypeConfigs = useCallback((configs: TypeConfig[]) => {
+    setTypeConfigs(configs);
+  }, []);
 
-    return distribution;
-  }, [stageOverrides]);
+  const getTypeStatus = useCallback((type: RennerType) => {
+    const actual = slots.reduce((count, slot) => (slot.name && slot.type === type) ? count + 1 : count, 0);
+    const { slots: optimalSlots } = getOptimalDistribution();
+    const optimal = optimalSlots[type] || 0;
+    if (actual < optimal) return 'under';
+    if (actual > optimal) return 'over';
+    return 'ok';
+  }, [slots, getOptimalDistribution]);
 
   const resetTeam = useCallback(() => {
     if (window.confirm("Weet je zeker dat je je team wilt wisselen?")) {
@@ -179,6 +228,12 @@ export function TeamProvider({ children }: { children: ReactNode }) {
     return false;
   }, [slots, selectRiderForSlot]);
 
+  const resetStageOverrides = useCallback(() => {
+    if (window.confirm("Weet je zeker dat je alle handmatige etappe-aanpassingen wilt wissen en terug wilt naar de standaard-analyse?")) {
+      setStageOverrides({});
+    }
+  }, []);
+
   return (
     <TeamContext.Provider value={{
       slots,
@@ -191,7 +246,13 @@ export function TeamProvider({ children }: { children: ReactNode }) {
       toggleLineup,
       updateStageWeights,
       getOptimalDistribution,
+      formulaParams,
+      typeConfigs,
+      updateFormulaParams,
+      updateTypeConfigs,
+      getTypeStatus,
       resetTeam,
+      resetStageOverrides,
       addRider
     }}>
       {children}

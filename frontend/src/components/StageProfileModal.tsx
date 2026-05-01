@@ -86,7 +86,7 @@ export function StageProfileModal({ stage, onClose, onNext, onPrev, currentWeigh
                 </div>
 
                 {/* Profile Image View */}
-                <div className="relative w-full h-[35vh] sm:h-[45vh] bg-[#f8f9fa] flex items-center justify-center p-2 sm:p-4 rounded-b-none border-b border-neutral-300">
+                <div className="relative w-full h-[25vh] sm:h-[45vh] bg-[#f8f9fa] flex items-center justify-center p-1 sm:p-4 rounded-b-none border-b border-neutral-300">
                     <img 
                         src={imageSrc} 
                         alt={`Profiel etappe ${stage.nummer}`} 
@@ -94,28 +94,28 @@ export function StageProfileModal({ stage, onClose, onNext, onPrev, currentWeigh
                     />
                     
                     {/* Navigation Arrows */}
-                    <button onClick={handlePrevStage} className="absolute left-4 top-1/2 -translate-y-1/2 p-2 sm:p-3 bg-white/80 hover:bg-white text-neutral-800 rounded-full shadow-lg backdrop-blur transition-all hover:scale-110 border border-neutral-200">
-                        <ChevronLeft size={24} />
+                    <button onClick={handlePrevStage} className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 p-2 sm:p-3 bg-white/80 hover:bg-white text-neutral-800 rounded-full shadow-lg backdrop-blur transition-all hover:scale-110 border border-neutral-200 z-10">
+                        <ChevronLeft size={20} />
                     </button>
-                    <button onClick={handleNextStage} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 sm:p-3 bg-white/80 hover:bg-white text-neutral-800 rounded-full shadow-lg backdrop-blur transition-all hover:scale-110 border border-neutral-200">
-                        <ChevronRight size={24} />
+                    <button onClick={handleNextStage} className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 p-2 sm:p-3 bg-white/80 hover:bg-white text-neutral-800 rounded-full shadow-lg backdrop-blur transition-all hover:scale-110 border border-neutral-200 z-10">
+                        <ChevronRight size={20} />
                     </button>
                 </div>
 
                 {/* Weights Editor Area */}
-                <div className="p-6 bg-neutral-900 flex flex-col gap-6">
+                <div className="p-4 sm:p-6 bg-neutral-900 flex flex-col gap-4 sm:gap-6 flex-1 overflow-y-auto">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-black text-white uppercase tracking-widest flex items-center gap-2">
+                        <h3 className="text-sm sm:text-lg font-black text-white uppercase tracking-widest flex items-center gap-2">
                             <span>Weging Configureren</span>
                         </h3>
                         {hasChanges && (
-                            <button onClick={() => setTempWeights([...currentWeights])} className="text-xs font-bold text-neutral-500 hover:text-white flex items-center gap-1 transition-colors">
+                            <button onClick={() => setTempWeights([...currentWeights])} className="text-[10px] sm:text-xs font-bold text-neutral-500 hover:text-white flex items-center gap-1 transition-colors">
                                 <Undo size={14} /> Herstellen
                             </button>
                         )}
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
                         {RENNER_TYPES.map(type => {
                             const w = tempWeights.find(tw => tw.type === type);
                             const val = w?.gewicht || 0;
@@ -134,7 +134,7 @@ export function StageProfileModal({ stage, onClose, onNext, onPrev, currentWeigh
                                         step="0.05"
                                         value={val}
                                         onChange={(e) => handleWeightChange(type, e.target.value)}
-                                        className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                                        className="w-full h-2 sm:h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
                                     />
                                     {/* Quick + / - buttons can go here if needed, but slider is nice */}
                                 </div>

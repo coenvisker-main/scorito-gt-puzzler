@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { Renner } from '../types';
-import { X } from 'lucide-react';
+import { Renner, RennerType } from '../types';
+import { X, Target } from 'lucide-react';
+import { useTeam } from '../context/TeamContext';
 
 interface AutocompleteProps {
   value: string;
@@ -15,6 +16,7 @@ export function Autocomplete({ value, options, onSelect, onChange, onClear, plac
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const { getTypeStatus } = useTeam();
 
   const filteredOptions = useMemo(() => {
     if (!value || value.length < 2) return [];
@@ -84,30 +86,47 @@ export function Autocomplete({ value, options, onSelect, onChange, onClear, plac
 
       {isOpen && filteredOptions.length > 0 && (
         <div className="absolute z-[100] left-0 right-0 mt-1 bg-neutral-900 border border-neutral-700 rounded-lg shadow-2xl overflow-hidden max-h-60 overflow-y-auto ring-1 ring-black">
-          {filteredOptions.map((opt, i) => (
-            <div
-              key={opt.id}
-              onMouseDown={(e) => e.preventDefault()}
-              className={`px-3 py-2 cursor-pointer flex justify-between items-center transition-colors border-b border-neutral-800/50 last:border-0 ${
-                i === highlightedIndex ? 'bg-amber-500 text-neutral-950 font-bold' : 'text-neutral-200 hover:bg-neutral-800'
-              }`}
-              onClick={() => {
-                onSelect(opt);
-                setIsOpen(false);
-              }}
-              onMouseEnter={() => setHighlightedIndex(i)}
-            >
-              <div className="min-w-0">
-                <div className="text-xs truncate tracking-tight font-black">{opt.naam}</div>
-                <div className={`text-[10px] uppercase font-black truncate tracking-tighter ${i === highlightedIndex ? 'text-neutral-900' : 'text-neutral-400'}`}>
-                    {opt.ploeg}
+          {filteredOptions.map((opt, i) => {
+            const status = getTypeStatus(opt.gebruiker_type || 'Wildcard');
+            return (
+              <div
+                key={opt.id}
+                onMouseDown={(e) => e.preventDefault()}
+                className={`px-3 py-2 cursor-pointer flex justify-between items-center transition-colors border-b border-neutral-800/50 last:border-0 ${
+                  i === highlightedIndex ? 'bg-amber-500 text-neutral-950 font-bold' : 'text-neutral-200 hover:bg-neutral-800'
+                }`}
+                onClick={() => {
+                  onSelect(opt);
+                  setIsOpen(false);
+                }}
+                onMouseEnter={() => setHighlightedIndex(i)}
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs truncate tracking-tight font-black flex items-center gap-1">
+                    {opt.naam}
+                    {opt.is_jongere && (
+                      <span className={`text-sm ${i === highlightedIndex ? 'text-neutral-900' : 'text-amber-500'}`}>*</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className={`text-[9px] uppercase font-black truncate tracking-tighter ${i === highlightedIndex ? 'text-neutral-900' : 'text-neutral-400'}`}>
+                        {opt.ploeg}
+                    </span>
+                    <span className={`text-[8px] font-black px-1 rounded uppercase tracking-tighter ${
+                        i === highlightedIndex 
+                            ? 'bg-black/20 text-black' 
+                            : status === 'under' ? 'bg-emerald-500/20 text-emerald-500' : status === 'over' ? 'bg-red-500/20 text-red-500' : 'bg-neutral-800 text-neutral-500'
+                    }`}>
+                        {opt.gebruiker_type} • {status === 'under' ? 'Nodig' : status === 'over' ? 'Vol' : 'OK'}
+                    </span>
+                  </div>
+                </div>
+                <div className={`text-[11px] font-mono font-black ml-2 ${i === highlightedIndex ? 'text-neutral-950' : 'text-amber-500'}`}>
+                  &euro;{(opt.prijs / 1000000).toFixed(1)}M
                 </div>
               </div>
-              <div className={`text-[11px] font-mono font-black ml-2 ${i === highlightedIndex ? 'text-neutral-950' : 'text-amber-500'}`}>
-                &euro;{(opt.prijs / 1000000).toFixed(1)}M
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
