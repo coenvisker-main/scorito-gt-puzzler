@@ -142,8 +142,8 @@ export function StartlistModal({ isOpen, onClose }: StartlistModalProps) {
                                             return (
                                                 <div key={rider.id} className={`flex items-center justify-between px-3 py-2 gap-2 hover:bg-neutral-800/40 transition-colors group ${isTooExpensive ? 'opacity-40 grayscale-[0.5]' : ''}`}>
                                                     <div className="flex items-center gap-2 flex-1 min-w-0">
-                                                        <div className="font-medium text-white text-xs sm:text-sm truncate flex-1 flex items-center gap-2">
-                                                            {rider.naam}
+                                                        <div className="font-medium text-white text-xs sm:text-sm flex-1 flex items-center gap-2 min-w-0">
+                                                            <span className="truncate">{rider.naam}</span>
                                                             {rider.is_jongere && (
                                                                 <span className="shrink-0 w-4 h-4 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-[10px] font-black border border-blue-500/30" title="Jongerenklassement">
                                                                     J
