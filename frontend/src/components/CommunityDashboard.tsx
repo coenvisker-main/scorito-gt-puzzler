@@ -10,7 +10,9 @@ export function CommunityDashboard() {
     const [userName, setUserName] = useState('');
     const [joinGroupId, setJoinGroupId] = useState<string | null>(null);
     const [copied, setCopied] = useState(false);
-    const [gemSearch, setGemSearch] = useState('');
+    const [expensivePage, setExpensivePage] = useState(0);
+    const [gemPage, setGemPage] = useState(0);
+    const PAGE_SIZE = 10;
 
     // Voting state
     const [ratings, setRatings] = useState<Record<string, number>>({});
@@ -319,49 +321,100 @@ export function CommunityDashboard() {
                                 </h4>
                                 <div className="space-y-2">
                                     {expensiveRiders
-                                        .map(r => ({ ...r, stats: aggregatedVotes[r.id] }))
-                                        .filter(r => r.stats && r.stats.totalScores > 0)
+                                        .map(rider => ({
+                                            ...rider,
+                                            stats: aggregatedVotes[rider.id] || { averageScore: 0, voteCount: 0 }
+                                        }))
+                                        .filter(r => r.stats.voteCount > 0)
                                         .sort((a, b) => b.stats.averageScore - a.stats.averageScore)
-                                        .slice(0, 10)
-                                        .map((rider, idx) => (
-                                            <div key={rider.id} className="flex items-center justify-between p-3 bg-neutral-950/50 rounded-xl">
-                                                <div className="flex items-center gap-3">
-                                                    <span className="text-xs font-black text-neutral-500 w-4">{idx + 1}.</span>
-                                                    <span className="font-bold text-sm text-white">{rider.naam}</span>
+                                        .slice(expensivePage * PAGE_SIZE, (expensivePage + 1) * PAGE_SIZE)
+                                        .map(rider => (
+                                            <div key={rider.id} className="flex items-center justify-between bg-neutral-950/50 p-3 rounded-xl border border-neutral-800/50">
+                                                <div className="flex flex-col min-w-0">
+                                                    <span className="text-xs font-bold text-white truncate">{rider.naam}</span>
+                                                    <span className="text-[10px] text-neutral-500 truncate">{rider.ploeg}</span>
                                                 </div>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-xs text-neutral-500">{rider.stats.totalScores} stemmen</span>
-                                                    <span className="bg-amber-500/20 text-amber-500 px-2 py-1 rounded-lg text-xs font-black border border-amber-500/30">
-                                                        {rider.stats.averageScore.toFixed(1)} <Star className="w-3 h-3 inline pb-0.5" />
-                                                    </span>
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-[10px] text-neutral-400 font-mono">€ {rider.prijs.toLocaleString()}</span>
+                                                    <div className="flex items-center gap-1 bg-amber-500/10 px-2 py-1 rounded text-amber-500 border border-amber-500/20">
+                                                        <span className="text-xs font-black">{rider.stats.averageScore.toFixed(1)}</span>
+                                                        <Star size={10} fill="currentColor" />
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))}
                                 </div>
+
+                                {expensiveRiders.filter(r => (aggregatedVotes[r.id]?.voteCount || 0) > 0).length > PAGE_SIZE && (
+                                    <div className="flex items-center justify-between mt-4">
+                                        <button 
+                                            disabled={expensivePage === 0}
+                                            onClick={() => setExpensivePage(p => p - 1)}
+                                            className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-neutral-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                        >
+                                            Vorige
+                                        </button>
+                                        <span className="text-[10px] font-bold text-neutral-600 uppercase">Pagina {expensivePage + 1}</span>
+                                        <button 
+                                            disabled={(expensivePage + 1) * PAGE_SIZE >= expensiveRiders.filter(r => (aggregatedVotes[r.id]?.voteCount || 0) > 0).length}
+                                            onClick={() => setExpensivePage(p => p + 1)}
+                                            className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-neutral-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                        >
+                                            Volgende
+                                        </button>
+                                    </div>
+                                )}
                             </div>
 
                             <div>
                                 <h4 className="text-sm font-bold text-neutral-500 uppercase tracking-widest mb-4 flex items-center gap-2 border-b border-neutral-800 pb-2">
-                                    <Gem className="w-4 h-4" /> Top Pareltjes
+                                    <Gem className="w-4 h-4" /> Populairste Pareltjes
                                 </h4>
                                 <div className="space-y-2">
                                     {cheapRiders
-                                        .map(r => ({ ...r, stats: aggregatedVotes[r.id] }))
-                                        .filter(r => r.stats && r.stats.gemCount > 0)
+                                        .map(rider => ({
+                                            ...rider,
+                                            stats: aggregatedVotes[rider.id] || { gemCount: 0 }
+                                        }))
+                                        .filter(r => r.stats.gemCount > 0)
                                         .sort((a, b) => b.stats.gemCount - a.stats.gemCount)
-                                        .slice(0, 10)
-                                        .map((rider, idx) => (
-                                            <div key={rider.id} className="flex items-center justify-between p-3 bg-neutral-950/50 rounded-xl">
-                                                <div className="flex items-center gap-3">
-                                                    <span className="text-xs font-black text-neutral-500 w-4">{idx + 1}.</span>
-                                                    <span className="font-bold text-sm text-white">{rider.naam}</span>
+                                        .slice(gemPage * PAGE_SIZE, (gemPage + 1) * PAGE_SIZE)
+                                        .map(rider => (
+                                            <div key={rider.id} className="flex items-center justify-between bg-neutral-950/50 p-3 rounded-xl border border-neutral-800/50">
+                                                <div className="flex flex-col min-w-0">
+                                                    <span className="text-xs font-bold text-white truncate">{rider.naam}</span>
+                                                    <span className="text-[10px] text-neutral-500 truncate">{rider.ploeg}</span>
                                                 </div>
-                                                <span className="bg-emerald-500/20 text-emerald-500 px-2 py-1 rounded-lg text-xs font-black border border-emerald-500/30 flex items-center gap-1">
-                                                    {rider.stats.gemCount} <Gem className="w-3 h-3 inline" />
-                                                </span>
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-[10px] text-neutral-400 font-mono">€ {rider.prijs.toLocaleString()}</span>
+                                                    <div className="flex items-center gap-1 bg-emerald-500/10 px-2 py-1 rounded text-emerald-500 border border-emerald-500/20">
+                                                        <span className="text-xs font-black">{rider.stats.gemCount}</span>
+                                                        <Gem size={10} fill="currentColor" />
+                                                    </div>
+                                                </div>
                                             </div>
                                         ))}
                                 </div>
+
+                                {cheapRiders.filter(r => (aggregatedVotes[r.id]?.gemCount || 0) > 0).length > PAGE_SIZE && (
+                                    <div className="flex items-center justify-between mt-4">
+                                        <button 
+                                            disabled={gemPage === 0}
+                                            onClick={() => setGemPage(p => p - 1)}
+                                            className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-neutral-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                        >
+                                            Vorige
+                                        </button>
+                                        <span className="text-[10px] font-bold text-neutral-600 uppercase">Pagina {gemPage + 1}</span>
+                                        <button 
+                                            disabled={(gemPage + 1) * PAGE_SIZE >= cheapRiders.filter(r => (aggregatedVotes[r.id]?.gemCount || 0) > 0).length}
+                                            onClick={() => setGemPage(p => p + 1)}
+                                            className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-neutral-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                        >
+                                            Volgende
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
