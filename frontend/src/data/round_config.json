@@ -24,7 +24,7 @@
         {
             "type": "Klimmer",
             "daily_klassement_bonus": 2,
-            "expected_eindklassement": 20
+            "expected_eindklassement": 10
         },
         {
             "type": "Aanvaller",

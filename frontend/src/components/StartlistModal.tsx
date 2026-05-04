@@ -9,9 +9,12 @@ interface StartlistModalProps {
     onClose: () => void;
 }
 
+import { useCommunity } from '../context/CommunityContext';
+
 export function StartlistModal({ isOpen, onClose }: StartlistModalProps) {
     const [searchTerm, setSearchTerm] = useState('');
     const { slots, addRider, maxAffordablePrice } = useTeam();
+    const { aggregatedVotes } = useCommunity();
 
     // Reset inner state when modal opens
     useEffect(() => {
@@ -134,6 +137,7 @@ export function StartlistModal({ isOpen, onClose }: StartlistModalProps) {
                                         {group.riders.map(rider => {
                                             const isAlreadyInTeam = slots.some(r => r.name === rider.naam && r.name !== '');
                                             const isTooExpensive = !isAlreadyInTeam && rider.prijs > maxAffordablePrice;
+                                            const communityStats = aggregatedVotes[rider.id];
 
                                             return (
                                                 <div key={rider.id} className={`flex items-center justify-between px-3 py-2 gap-2 hover:bg-neutral-800/40 transition-colors group ${isTooExpensive ? 'opacity-40 grayscale-[0.5]' : ''}`}>
@@ -145,8 +149,18 @@ export function StartlistModal({ isOpen, onClose }: StartlistModalProps) {
                                                                     J
                                                                 </span>
                                                             )}
+                                                            {communityStats && communityStats.averageScore > 0 && rider.prijs >= 1000000 && (
+                                                                <span className="bg-amber-500/20 text-amber-500 px-1.5 py-0.5 rounded text-[9px] font-black border border-amber-500/30 shrink-0" title="Community Score (Kopman)">
+                                                                    {communityStats.averageScore.toFixed(1)} ★
+                                                                </span>
+                                                            )}
+                                                            {communityStats && communityStats.gemCount > 0 && rider.prijs <= 750000 && (
+                                                                <span className="bg-emerald-500/20 text-emerald-500 px-1.5 py-0.5 rounded text-[9px] font-black border border-emerald-500/30 shrink-0" title="Community Pareltjes Stemmen">
+                                                                    {communityStats.gemCount} 💎
+                                                                </span>
+                                                            )}
                                                             {isTooExpensive && (
-                                                                <span className="text-[8px] font-bold text-red-500 uppercase tracking-tighter border border-red-500/30 px-1 rounded">Onbetaalbaar</span>
+                                                                <span className="text-[8px] font-bold text-red-500 uppercase tracking-tighter border border-red-500/30 px-1 rounded shrink-0">Onbetaalbaar</span>
                                                             )}
                                                         </div>
                                                         <div className={`text-[10px] sm:text-xs font-mono w-auto sm:w-20 shrink-0 px-1.5 py-0.5 rounded text-right ${isTooExpensive ? 'text-red-400 bg-red-950/20' : 'text-neutral-400 bg-neutral-950/50'}`}>

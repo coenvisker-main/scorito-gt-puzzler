@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { Renner, RennerType } from '../types';
-import { X, Target } from 'lucide-react';
+import { Renner } from '../types';
+import { X } from 'lucide-react';
 import { useTeam } from '../context/TeamContext';
+import { useCommunity } from '../context/CommunityContext';
 
 interface AutocompleteProps {
   value: string;
@@ -17,6 +18,7 @@ export function Autocomplete({ value, options, onSelect, onChange, onClear, plac
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const { getTypeStatus, maxAffordablePrice, slots } = useTeam();
+  const { aggregatedVotes } = useCommunity();
 
   const filteredOptions = useMemo(() => {
     if (!value || value.length < 2) return [];
@@ -93,6 +95,7 @@ export function Autocomplete({ value, options, onSelect, onChange, onClear, plac
           {filteredOptions.map((opt, i) => {
             const status = getTypeStatus(opt.gebruiker_type || 'Wildcard');
             const isTooExpensive = opt.prijs > maxAffordablePrice;
+            const communityStats = aggregatedVotes[opt.id];
 
             return (
               <div
@@ -112,13 +115,23 @@ export function Autocomplete({ value, options, onSelect, onChange, onClear, plac
                 onMouseEnter={() => !isTooExpensive && setHighlightedIndex(i)}
               >
                 <div className="min-w-0 flex-1">
-                  <div className="text-xs truncate tracking-tight font-black flex items-center gap-1">
+                  <div className="text-xs truncate tracking-tight font-black flex items-center gap-1 flex-wrap">
                     {opt.naam}
                     {opt.is_jongere && (
                       <span className={`text-sm ${i === highlightedIndex ? 'text-neutral-900' : 'text-amber-500'}`}>*</span>
                     )}
+                    {communityStats && communityStats.averageScore > 0 && opt.prijs >= 1000000 && (
+                        <span className={`px-1 rounded text-[8px] font-black border ml-1 ${i === highlightedIndex ? 'bg-black/20 text-black border-black/30' : 'bg-amber-500/20 text-amber-500 border-amber-500/30'}`}>
+                            {communityStats.averageScore.toFixed(1)} ★
+                        </span>
+                    )}
+                    {communityStats && communityStats.gemCount > 0 && opt.prijs <= 750000 && (
+                        <span className={`px-1 rounded text-[8px] font-black border ml-1 ${i === highlightedIndex ? 'bg-black/20 text-black border-black/30' : 'bg-emerald-500/20 text-emerald-500 border-emerald-500/30'}`}>
+                            {communityStats.gemCount} 💎
+                        </span>
+                    )}
                     {isTooExpensive && (
-                        <span className="text-[8px] bg-red-500/20 text-red-500 border border-red-500/30 px-1 rounded ml-1">TE DUUR</span>
+                        <span className="text-[8px] bg-red-500/20 text-red-500 border border-red-500/30 px-1 rounded ml-1 shrink-0">TE DUUR</span>
                     )}
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
