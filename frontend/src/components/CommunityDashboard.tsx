@@ -12,6 +12,7 @@ export function CommunityDashboard() {
     const [copied, setCopied] = useState(false);
     const [expensivePage, setExpensivePage] = useState(0);
     const [gemPage, setGemPage] = useState(0);
+    const [gemSearch, setGemSearch] = useState('');
     const PAGE_SIZE = 10;
 
     // Voting state
@@ -323,9 +324,9 @@ export function CommunityDashboard() {
                                     {expensiveRiders
                                         .map(rider => ({
                                             ...rider,
-                                            stats: aggregatedVotes[rider.id] || { averageScore: 0, voteCount: 0 }
+                                            stats: aggregatedVotes[rider.id] || { averageScore: 0, totalScores: 0 }
                                         }))
-                                        .filter(r => r.stats.voteCount > 0)
+                                        .filter(r => r.stats.totalScores > 0)
                                         .sort((a, b) => b.stats.averageScore - a.stats.averageScore)
                                         .slice(expensivePage * PAGE_SIZE, (expensivePage + 1) * PAGE_SIZE)
                                         .map(rider => (
@@ -345,7 +346,7 @@ export function CommunityDashboard() {
                                         ))}
                                 </div>
 
-                                {expensiveRiders.filter(r => (aggregatedVotes[r.id]?.voteCount || 0) > 0).length > PAGE_SIZE && (
+                                {expensiveRiders.filter(r => (aggregatedVotes[r.id]?.totalScores || 0) > 0).length > PAGE_SIZE && (
                                     <div className="flex items-center justify-between mt-4">
                                         <button 
                                             disabled={expensivePage === 0}
@@ -356,7 +357,7 @@ export function CommunityDashboard() {
                                         </button>
                                         <span className="text-[10px] font-bold text-neutral-600 uppercase">Pagina {expensivePage + 1}</span>
                                         <button 
-                                            disabled={(expensivePage + 1) * PAGE_SIZE >= expensiveRiders.filter(r => (aggregatedVotes[r.id]?.voteCount || 0) > 0).length}
+                                            disabled={(expensivePage + 1) * PAGE_SIZE >= expensiveRiders.filter(r => (aggregatedVotes[r.id]?.totalScores || 0) > 0).length}
                                             onClick={() => setExpensivePage(p => p + 1)}
                                             className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-neutral-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                                         >
