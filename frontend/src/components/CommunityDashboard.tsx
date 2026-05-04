@@ -336,7 +336,10 @@ export function CommunityDashboard() {
                                                     <span className="text-[10px] text-neutral-500 truncate">{rider.ploeg}</span>
                                                 </div>
                                                 <div className="flex items-center gap-3">
-                                                    <span className="text-[10px] text-neutral-400 font-mono">€ {rider.prijs.toLocaleString()}</span>
+                                                    <div className="flex flex-col items-end gap-0.5">
+                                                        <span className="text-[10px] text-neutral-400 font-mono">€ {rider.prijs.toLocaleString()}</span>
+                                                        <span className="text-[8px] text-neutral-500 font-bold uppercase tracking-tighter">{rider.stats.totalScores} {rider.stats.totalScores === 1 ? 'stem' : 'stemmen'}</span>
+                                                    </div>
                                                     <div className="flex items-center gap-1 bg-amber-500/10 px-2 py-1 rounded text-amber-500 border border-amber-500/20">
                                                         <span className="text-xs font-black">{rider.stats.averageScore.toFixed(1)}</span>
                                                         <Star size={10} fill="currentColor" />
