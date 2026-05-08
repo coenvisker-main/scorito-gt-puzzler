@@ -1,5 +1,9 @@
 export type RennerType = 'GC' | 'Sprinter' | 'Sprint+' | 'Klimmer' | 'Aanvaller' | 'Tijdrijder' | 'Wildcard';
 
+export const RENNER_TYPES: RennerType[] = ['GC', 'Klimmer', 'Sprinter', 'Sprint+', 'Aanvaller', 'Tijdrijder', 'Wildcard'];
+
+export const TEAM_SIZE = 20;
+
 export interface RennerTypeWeging {
   type: RennerType;
   gewicht: number; // 0.0 to 1.0 (som = 1.0)

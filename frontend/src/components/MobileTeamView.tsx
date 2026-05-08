@@ -1,6 +1,7 @@
-import { Crown, Link2, Search, Trash2 } from 'lucide-react';
+import { Crown, Link2 } from 'lucide-react';
 import { useTeam } from '../context/TeamContext';
 import { Etappe, RennerType } from '../types';
+import { AggregatedVotes } from '../types/community';
 import { Autocomplete } from './Autocomplete';
 import { riders as allRiders } from '../data/riders';
 
@@ -9,9 +10,10 @@ interface MobileTeamViewProps {
     teamSynergy: Record<string, { count: number, colorIndex: number }>;
     SYNERGY_COLORS: string[];
     RENNER_TYPES: RennerType[];
+    communityVotes: AggregatedVotes;
 }
 
-export function MobileTeamView({ stages, teamSynergy, SYNERGY_COLORS, RENNER_TYPES }: MobileTeamViewProps) {
+export function MobileTeamView({ stages, teamSynergy, SYNERGY_COLORS, RENNER_TYPES, communityVotes }: MobileTeamViewProps) {
     const { slots, updateSlot, selectRiderForSlot, clearSlot, toggleLineup } = useTeam();
 
     const getRiderStageCount = (slotLineup: Record<number, string>) => {
@@ -40,6 +42,7 @@ export function MobileTeamView({ stages, teamSynergy, SYNERGY_COLORS, RENNER_TYP
                                     onChange={(val) => updateSlot(slot.id, 'name', val)}
                                     onSelect={(rider) => selectRiderForSlot(slot.id, rider)}
                                     onClear={() => clearSlot(slot.id)}
+                                    communityVotes={communityVotes}
                                 />
                             </div>
                         </div>

@@ -1,10 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useTeam } from '../context/TeamContext';
-import { RennerType, TypeConfig } from '../types';
+import { RennerType, TypeConfig, RENNER_TYPES } from '../types';
 import { BarChart3, Info, AlertCircle } from 'lucide-react';
 import { giro2026 } from '../data/giro2026';
-
-const RENNER_TYPES: RennerType[] = ['GC', 'Klimmer', 'Sprinter', 'Sprint+', 'Aanvaller', 'Tijdrijder', 'Wildcard'];
 
 interface DistributionSummaryProps {
     hideComparison?: boolean;

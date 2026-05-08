@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useCommunity } from '../context/CommunityContext';
 import { riders } from '../data/riders';
-// Removed Renner import as it is unused
+import { Pagination } from './Pagination';
 import { Link, Users, Star, Gem, Check, LogOut, Loader2, Globe } from 'lucide-react';
 
 export function CommunityDashboard() {
@@ -13,6 +13,7 @@ export function CommunityDashboard() {
     const [expensivePage, setExpensivePage] = useState(0);
     const [gemPage, setGemPage] = useState(0);
     const [gemSearch, setGemSearch] = useState('');
+    const [voteStatus, setVoteStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
     const PAGE_SIZE = 10;
 
     // Voting state
@@ -95,17 +96,14 @@ export function CommunityDashboard() {
             if (prev.includes(riderId)) {
                 return prev.filter(id => id !== riderId);
             }
-            if (prev.length >= 6) {
-                alert("Je mag maximaal 6 pareltjes selecteren.");
-                return prev;
-            }
+            if (prev.length >= 6) return prev;
             return [...prev, riderId];
         });
     };
 
     const handleSubmitVotes = async () => {
         if (gems.length < 2) {
-            alert("Selecteer minimaal 2 pareltjes.");
+            setVoteStatus({ type: 'error', message: 'Selecteer minimaal 2 pareltjes.' });
             return;
         }
 
@@ -118,9 +116,11 @@ export function CommunityDashboard() {
         }
 
         const success = await submitVotes(newVotes);
-        if (success) {
-            alert("Stemmen succesvol opgeslagen!");
-        }
+        setVoteStatus(success
+            ? { type: 'success', message: 'Stemmen succesvol opgeslagen!' }
+            : { type: 'error', message: 'Er ging iets mis. Probeer het opnieuw.' }
+        );
+        setTimeout(() => setVoteStatus(null), 3000);
     };
 
     if (isLoading && !currentGroup) {
@@ -301,7 +301,16 @@ export function CommunityDashboard() {
                         </div>
                     </div>
 
-                    <button 
+                    {voteStatus && (
+                        <div className={`p-3 rounded-xl text-sm font-bold text-center animate-in fade-in duration-300 ${
+                            voteStatus.type === 'success'
+                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                                : 'bg-red-500/10 text-red-400 border border-red-500/30'
+                        }`}>
+                            {voteStatus.message}
+                        </div>
+                    )}
+                    <button
                         onClick={handleSubmitVotes}
                         disabled={isLoading || gems.length < 2}
                         className="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-neutral-800 disabled:text-neutral-500 disabled:cursor-not-allowed text-neutral-950 font-black uppercase tracking-wider py-4 rounded-xl transition-colors shadow-xl shadow-amber-500/20"
@@ -349,25 +358,13 @@ export function CommunityDashboard() {
                                         ))}
                                 </div>
 
-                                {expensiveRiders.filter(r => (aggregatedVotes[r.id]?.totalScores || 0) > 0).length > PAGE_SIZE && (
-                                    <div className="flex items-center justify-between mt-4">
-                                        <button 
-                                            disabled={expensivePage === 0}
-                                            onClick={() => setExpensivePage(p => p - 1)}
-                                            className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-neutral-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                        >
-                                            Vorige
-                                        </button>
-                                        <span className="text-[10px] font-bold text-neutral-600 uppercase">Pagina {expensivePage + 1}</span>
-                                        <button 
-                                            disabled={(expensivePage + 1) * PAGE_SIZE >= expensiveRiders.filter(r => (aggregatedVotes[r.id]?.totalScores || 0) > 0).length}
-                                            onClick={() => setExpensivePage(p => p + 1)}
-                                            className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-neutral-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                        >
-                                            Volgende
-                                        </button>
-                                    </div>
-                                )}
+                                <Pagination
+                                    page={expensivePage}
+                                    totalItems={expensiveRiders.filter(r => (aggregatedVotes[r.id]?.totalScores || 0) > 0).length}
+                                    pageSize={PAGE_SIZE}
+                                    onPrev={() => setExpensivePage(p => p - 1)}
+                                    onNext={() => setExpensivePage(p => p + 1)}
+                                />
                             </div>
 
                             <div>
@@ -400,25 +397,13 @@ export function CommunityDashboard() {
                                         ))}
                                 </div>
 
-                                {cheapRiders.filter(r => (aggregatedVotes[r.id]?.gemCount || 0) > 0).length > PAGE_SIZE && (
-                                    <div className="flex items-center justify-between mt-4">
-                                        <button 
-                                            disabled={gemPage === 0}
-                                            onClick={() => setGemPage(p => p - 1)}
-                                            className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-neutral-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                        >
-                                            Vorige
-                                        </button>
-                                        <span className="text-[10px] font-bold text-neutral-600 uppercase">Pagina {gemPage + 1}</span>
-                                        <button 
-                                            disabled={(gemPage + 1) * PAGE_SIZE >= cheapRiders.filter(r => (aggregatedVotes[r.id]?.gemCount || 0) > 0).length}
-                                            onClick={() => setGemPage(p => p + 1)}
-                                            className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-neutral-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                        >
-                                            Volgende
-                                        </button>
-                                    </div>
-                                )}
+                                <Pagination
+                                    page={gemPage}
+                                    totalItems={cheapRiders.filter(r => (aggregatedVotes[r.id]?.gemCount || 0) > 0).length}
+                                    pageSize={PAGE_SIZE}
+                                    onPrev={() => setGemPage(p => p - 1)}
+                                    onNext={() => setGemPage(p => p + 1)}
+                                />
                             </div>
                         </div>
                     </div>

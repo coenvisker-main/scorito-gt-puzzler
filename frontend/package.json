@@ -10,12 +10,12 @@
     "preview": "node node_modules/vite/bin/vite.js preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.43.4",
     "clsx": "^2.1.0",
     "lucide-react": "^0.470.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "tailwind-merge": "^2.2.0",
-    "@supabase/supabase-js": "^2.43.4"
+    "tailwind-merge": "^2.2.0"
   },
   "devDependencies": {
     "@types/node": "^25.6.0",

@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { Renner } from '../types';
+import { AggregatedVotes } from '../types/community';
 import { X } from 'lucide-react';
 import { useTeam } from '../context/TeamContext';
-import { useCommunity } from '../context/CommunityContext';
 
 interface AutocompleteProps {
   value: string;
@@ -11,14 +11,14 @@ interface AutocompleteProps {
   onChange: (val: string) => void;
   onClear: () => void;
   placeholder?: string;
+  communityVotes?: AggregatedVotes;
 }
 
-export function Autocomplete({ value, options, onSelect, onChange, onClear, placeholder }: AutocompleteProps) {
+export function Autocomplete({ value, options, onSelect, onChange, onClear, placeholder, communityVotes }: AutocompleteProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const { getTypeStatus, maxAffordablePrice, slots } = useTeam();
-  const { aggregatedVotes } = useCommunity();
 
   const filteredOptions = useMemo(() => {
     if (!value || value.length < 2) return [];
@@ -95,7 +95,7 @@ export function Autocomplete({ value, options, onSelect, onChange, onClear, plac
           {filteredOptions.map((opt, i) => {
             const status = getTypeStatus(opt.gebruiker_type || 'Wildcard');
             const isTooExpensive = opt.prijs > maxAffordablePrice;
-            const communityStats = aggregatedVotes[opt.id];
+            const communityStats = communityVotes[opt.id];
 
             return (
               <div

@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Database, DownloadCloud, Search, RefreshCw, Save, Lock, Settings2, Info } from 'lucide-react';
-import { Renner, RennerType, TypeConfig, FormulaParams } from '../types';
+import { Renner, RennerType, TypeConfig, FormulaParams, RENNER_TYPES } from '../types';
 import { riders as initialRiders } from '../data/riders';
 
 import { useTeam } from '../context/TeamContext';
 
 // Backend API base URL (runs separately via server.js on port 3001)
 const API_BASE = 'http://127.0.0.1:3001';
-
-const RENNER_TYPES: RennerType[] = ['GC', 'Klimmer', 'Sprinter', 'Sprint+', 'Aanvaller', 'Tijdrijder', 'Wildcard'];
 
 type SortKey = 'naam' | 'ploeg' | 'prijs' | 'type';
 
@@ -25,6 +23,14 @@ export function AdminDashboard() {
     const [formulaConfig, setFormulaConfig] = useState<{ formulaParams: FormulaParams, typeConfigs: TypeConfig[] } | null>(null);
     const [isSavingConfig, setIsSavingConfig] = useState(false);
     const [isGuideOpen, setIsGuideOpen] = useState(false);
+    const [isSavingAll, setIsSavingAll] = useState(false);
+    const [confirmAction, setConfirmAction] = useState<'formula' | 'analysis' | null>(null);
+    const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+    const showNotification = (type: 'success' | 'error', message: string) => {
+        setNotification({ type, message });
+        setTimeout(() => setNotification(null), 3000);
+    };
 
     useEffect(() => {
         const init = async () => {
@@ -78,9 +84,12 @@ export function AdminDashboard() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formulaConfig)
             });
-            alert("Formule configuratie opgeslagen!");
-        } catch (e) { alert("Fout bij opslaan: " + e); }
-        finally { setIsSavingConfig(false); }
+            showNotification('success', 'Formule configuratie opgeslagen!');
+        } catch (e) {
+            showNotification('error', 'Fout bij opslaan: ' + e);
+        } finally {
+            setIsSavingConfig(false);
+        }
     };
 
     const handleSort = (key: SortKey) => {
@@ -133,8 +142,6 @@ export function AdminDashboard() {
         });
     };
 
-    const [isSavingAll, setIsSavingAll] = useState(false);
-
     const submitUpdate = async (id: string) => {
         const update = pendingUpdates[id];
         if (!update) return;
@@ -158,7 +165,7 @@ export function AdminDashboard() {
                 });
             }
         } catch (e) {
-            alert('Kon wijziging niet opslaan: ' + e);
+            showNotification('error', 'Kon wijziging niet opslaan: ' + e);
         }
     };
 
@@ -191,7 +198,7 @@ export function AdminDashboard() {
                 setPendingUpdates({});
             }
         } catch (e) {
-            alert('Kon bulk-wijziging niet opslaan: ' + e);
+            showNotification('error', 'Kon bulk-wijziging niet opslaan: ' + e);
         } finally {
             setIsSavingAll(false);
         }
@@ -233,23 +240,38 @@ export function AdminDashboard() {
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <button
-                            onClick={resetFormulaConfigs}
-                            className="flex items-center gap-3 px-6 py-3 rounded-xl font-black uppercase tracking-wider transition-all bg-neutral-800 text-neutral-300 border border-neutral-700 hover:bg-neutral-700 hover:scale-105"
-                            title="Reset alle formule-instellingen naar de nieuwe standaarden"
-                        >
-                            <Settings2 className="w-5 h-5" />
-                            Reset Formule
-                        </button>
-
-                        <button
-                            onClick={resetStageOverrides}
-                            className="flex items-center gap-3 px-6 py-3 rounded-xl font-black uppercase tracking-wider transition-all bg-neutral-800 text-neutral-300 border border-neutral-700 hover:bg-neutral-700 hover:scale-105"
-                            title="Reset alle handmatige etappe-aanpassingen naar de nieuwe standaarden"
-                        >
-                            <RefreshCw className="w-5 h-5" />
-                            Reset Analyse
-                        </button>
+                        {confirmAction === 'formula' ? (
+                            <div className="flex items-center gap-2">
+                                <span className="text-[11px] text-neutral-400 font-bold">Formule resetten?</span>
+                                <button onClick={() => { resetFormulaConfigs(); setConfirmAction(null); }} className="px-3 py-2 bg-red-500 text-white rounded-xl text-[11px] font-black uppercase hover:bg-red-400 transition-all">Ja</button>
+                                <button onClick={() => setConfirmAction(null)} className="px-3 py-2 bg-neutral-800 text-neutral-300 border border-neutral-700 rounded-xl text-[11px] font-black uppercase hover:bg-neutral-700 transition-all">Nee</button>
+                            </div>
+                        ) : confirmAction === 'analysis' ? (
+                            <div className="flex items-center gap-2">
+                                <span className="text-[11px] text-neutral-400 font-bold">Analyse resetten?</span>
+                                <button onClick={() => { resetStageOverrides(); setConfirmAction(null); }} className="px-3 py-2 bg-red-500 text-white rounded-xl text-[11px] font-black uppercase hover:bg-red-400 transition-all">Ja</button>
+                                <button onClick={() => setConfirmAction(null)} className="px-3 py-2 bg-neutral-800 text-neutral-300 border border-neutral-700 rounded-xl text-[11px] font-black uppercase hover:bg-neutral-700 transition-all">Nee</button>
+                            </div>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={() => setConfirmAction('formula')}
+                                    className="flex items-center gap-3 px-6 py-3 rounded-xl font-black uppercase tracking-wider transition-all bg-neutral-800 text-neutral-300 border border-neutral-700 hover:bg-neutral-700 hover:scale-105"
+                                    title="Reset alle formule-instellingen naar de nieuwe standaarden"
+                                >
+                                    <Settings2 className="w-5 h-5" />
+                                    Reset Formule
+                                </button>
+                                <button
+                                    onClick={() => setConfirmAction('analysis')}
+                                    className="flex items-center gap-3 px-6 py-3 rounded-xl font-black uppercase tracking-wider transition-all bg-neutral-800 text-neutral-300 border border-neutral-700 hover:bg-neutral-700 hover:scale-105"
+                                    title="Reset alle handmatige etappe-aanpassingen naar de nieuwe standaarden"
+                                >
+                                    <RefreshCw className="w-5 h-5" />
+                                    Reset Analyse
+                                </button>
+                            </>
+                        )}
 
                         <button
                             onClick={handleScrape}
@@ -280,6 +302,16 @@ export function AdminDashboard() {
                     </div>
                 )}
             </div>
+
+            {notification && (
+                <div className={`p-4 rounded-xl text-sm font-bold flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300 ${
+                    notification.type === 'success'
+                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                        : 'bg-red-500/10 text-red-400 border border-red-500/30'
+                }`}>
+                    {notification.message}
+                </div>
+            )}
 
             {/* Formula Config Card */}
             <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-2xl">

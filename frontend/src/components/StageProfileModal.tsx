@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, ChevronLeft, ChevronRight, Mountain, Image as ImageIcon, Save, Undo } from 'lucide-react';
-import { Etappe, RennerType, RennerTypeWeging } from '../types';
+import { Etappe, RennerType, RennerTypeWeging, RENNER_TYPES } from '../types';
 
 interface StageProfileModalProps {
     stage: Etappe | null;
@@ -10,8 +10,6 @@ interface StageProfileModalProps {
     currentWeights: RennerTypeWeging[];
     onSaveWeights: (weights: RennerTypeWeging[]) => void;
 }
-
-const RENNER_TYPES: RennerType[] = ['GC', 'Klimmer', 'Sprinter', 'Sprint+', 'Aanvaller', 'Tijdrijder', 'Wildcard'];
 
 export function StageProfileModal({ stage, onClose, onNext, onPrev, currentWeights, onSaveWeights }: StageProfileModalProps) {
     const [tempWeights, setTempWeights] = useState<RennerTypeWeging[]>([]);

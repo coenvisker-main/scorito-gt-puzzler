@@ -58,7 +58,7 @@ export function calculateOptimalDistribution(
   const types = Object.keys(tcsScores) as RennerType[];
   const ALPHA_BASE = 1.0;
   const BETA_BASE = 15;
-  const GAMMA_BASE = 21; // standard round length
+  const GAMMA_BASE = etappes.length;
   const DELTA_BASE = 1.0;
 
   types.forEach(t => {

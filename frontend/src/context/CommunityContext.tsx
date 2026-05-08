@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, ReactNode } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { Group, Vote, AggregatedVotes } from '../types/community';
+import { STORAGE_KEYS } from '../utils/storageKeys';
 
 interface CommunityContextType {
     currentGroup: Group | null;
@@ -21,14 +22,13 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
     const [currentGroup, setCurrentGroup] = useState<Group | null>(null);
     const [currentUser, setCurrentUser] = useState<string | null>(null);
     const [votes, setVotes] = useState<Vote[]>([]);
-    const [aggregatedVotes, setAggregatedVotes] = useState<AggregatedVotes>({});
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     // Load from local storage on mount
     useEffect(() => {
-        const savedGroupId = localStorage.getItem('scorito_community_group_id');
-        const savedUserName = localStorage.getItem('scorito_community_user_name');
+        const savedGroupId = localStorage.getItem(STORAGE_KEYS.COMMUNITY_GROUP_ID);
+        const savedUserName = localStorage.getItem(STORAGE_KEYS.COMMUNITY_USER_NAME);
         
         if (savedGroupId && savedUserName) {
             joinGroup(savedGroupId, savedUserName);
@@ -67,31 +67,28 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
         };
     }, [currentGroup]);
 
-    // Calculate aggregated votes
-    useEffect(() => {
+    const aggregatedVotes = useMemo<AggregatedVotes>(() => {
         const aggregated: AggregatedVotes = {};
-        
+
         votes.forEach(vote => {
             if (!aggregated[vote.rider_id]) {
                 aggregated[vote.rider_id] = { averageScore: 0, totalScores: 0, gemCount: 0 };
             }
-            
+
             if (vote.is_gem) {
                 aggregated[vote.rider_id].gemCount++;
             }
-            
+
             if (vote.interest_score !== null) {
-                // Calculate running average
                 const current = aggregated[vote.rider_id];
                 const newTotal = current.totalScores + 1;
                 const newAvg = ((current.averageScore * current.totalScores) + vote.interest_score) / newTotal;
-                
                 aggregated[vote.rider_id].averageScore = newAvg;
                 aggregated[vote.rider_id].totalScores = newTotal;
             }
         });
 
-        setAggregatedVotes(aggregated);
+        return aggregated;
     }, [votes]);
 
     const joinGroup = async (groupId: string, userName: string) => {
@@ -112,8 +109,8 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
 
             setCurrentGroup(data);
             setCurrentUser(userName);
-            localStorage.setItem('scorito_community_group_id', groupId);
-            localStorage.setItem('scorito_community_user_name', userName);
+            localStorage.setItem(STORAGE_KEYS.COMMUNITY_GROUP_ID, groupId);
+            localStorage.setItem(STORAGE_KEYS.COMMUNITY_USER_NAME, userName);
             setIsLoading(false);
             return true;
         } catch (err: any) {
@@ -172,8 +169,8 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
         setCurrentGroup(null);
         setCurrentUser(null);
         setVotes([]);
-        localStorage.removeItem('scorito_community_group_id');
-        localStorage.removeItem('scorito_community_user_name');
+        localStorage.removeItem(STORAGE_KEYS.COMMUNITY_GROUP_ID);
+        localStorage.removeItem(STORAGE_KEYS.COMMUNITY_USER_NAME);
         
         // Remove URL param if present
         const url = new URL(window.location.href);

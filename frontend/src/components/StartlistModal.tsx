@@ -2,14 +2,14 @@ import { useMemo, useState, useEffect } from 'react';
 import { X, Plus, Check, Search, ListPlus } from 'lucide-react';
 import { riders as allRiders } from '../data/riders';
 import { useTeam } from '../context/TeamContext';
-import { Renner } from '../types';
+import { useCommunity } from '../context/CommunityContext';
+import { Renner, TEAM_SIZE } from '../types';
+import { formatMoney } from '../utils/formatUtils';
 
 interface StartlistModalProps {
     isOpen: boolean;
     onClose: () => void;
 }
-
-import { useCommunity } from '../context/CommunityContext';
 
 export function StartlistModal({ isOpen, onClose }: StartlistModalProps) {
     const [searchTerm, setSearchTerm] = useState('');
@@ -23,11 +23,7 @@ export function StartlistModal({ isOpen, onClose }: StartlistModalProps) {
         }
     }, [isOpen]);
 
-    const formatMoney = (val: number) => {
-        return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(val);
-    };
-
-    const isTeamFull = slots.filter(s => s.name.trim() !== '').length >= 20;
+    const isTeamFull = slots.filter(s => s.name.trim() !== '').length >= TEAM_SIZE;
 
     const { groupedRiders, totalCount } = useMemo(() => {
         const filtered = allRiders.filter(r => {

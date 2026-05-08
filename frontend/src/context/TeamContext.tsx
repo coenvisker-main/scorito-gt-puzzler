@@ -1,7 +1,8 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback } from 'react';
-import { TeamSlot, Renner, LineupStatus, RennerType, RennerTypeWeging, FormulaParams, TypeConfig } from '../types';
+import { TeamSlot, Renner, LineupStatus, RennerType, RennerTypeWeging, FormulaParams, TypeConfig, TEAM_SIZE } from '../types';
 import { giro2026 } from '../data/giro2026';
 import { calculateOptimalDistribution } from '../utils/formulaUtils';
+import { STORAGE_KEYS } from '../utils/storageKeys';
 
 interface TeamContextType {
   slots: TeamSlot[];
@@ -21,13 +22,14 @@ interface TeamContextType {
   updateFormulaParams: (params: FormulaParams) => void;
   updateTypeConfigs: (configs: TypeConfig[]) => void;
   resetTeam: () => void;
+  resetStageOverrides: () => void;
+  resetFormulaConfigs: () => void;
   addRider: (rider: Renner) => boolean;
 }
 
 const TeamContext = createContext<TeamContextType | undefined>(undefined);
 
 const MAX_BUDGET = giro2026.budget;
-const SLOTS_COUNT = 20;
 const MIN_RIDER_PRICE = 500000;
 
 const generateId = (index: number) => `slot-${index}`;
@@ -43,11 +45,11 @@ const createEmptySlot = (index: number): TeamSlot => ({
 });
 
 const getInitialSlots = () => {
-    const saved = localStorage.getItem('scorito_gt_slots');
+    const saved = localStorage.getItem(STORAGE_KEYS.SLOTS);
     if (saved) {
         try {
             const parsed = JSON.parse(saved);
-            return Array.from({ length: SLOTS_COUNT }, (_, i) => {
+            return Array.from({ length: TEAM_SIZE }, (_, i) => {
                 const existing = parsed[i] || {};
                 return {
                     ...createEmptySlot(i),
@@ -59,11 +61,11 @@ const getInitialSlots = () => {
             console.error("Failed to parse saved slots", e);
         }
     }
-    return Array.from({ length: SLOTS_COUNT }, (_, i) => createEmptySlot(i));
+    return Array.from({ length: TEAM_SIZE }, (_, i) => createEmptySlot(i));
 };
 
 const getInitialOverrides = () => {
-    const saved = localStorage.getItem('scorito_gt_overrides');
+    const saved = localStorage.getItem(STORAGE_KEYS.STAGE_OVERRIDES);
     if (saved) {
         try {
             return JSON.parse(saved);
@@ -75,7 +77,7 @@ const getInitialOverrides = () => {
 };
 
 const getInitialFormulaParams = (): FormulaParams => {
-    const saved = localStorage.getItem('scorito_gt_formula_params');
+    const saved = localStorage.getItem(STORAGE_KEYS.FORMULA_PARAMS);
     if (saved) {
         try { 
             const parsed = JSON.parse(saved);
@@ -97,7 +99,7 @@ const getInitialFormulaParams = (): FormulaParams => {
 };
 
 const getInitialTypeConfigs = () => {
-    const saved = localStorage.getItem('scorito_gt_type_configs');
+    const saved = localStorage.getItem(STORAGE_KEYS.TYPE_CONFIGS);
     if (saved) {
         try { return JSON.parse(saved); } catch (e) { console.error(e); }
     }
@@ -111,24 +113,24 @@ export function TeamProvider({ children }: { children: ReactNode }) {
   const [typeConfigs, setTypeConfigs] = useState<TypeConfig[]>(getInitialTypeConfigs);
 
   useEffect(() => {
-    localStorage.setItem('scorito_gt_slots', JSON.stringify(slots));
+    localStorage.setItem(STORAGE_KEYS.SLOTS, JSON.stringify(slots));
   }, [slots]);
 
   useEffect(() => {
-    localStorage.setItem('scorito_gt_overrides', JSON.stringify(stageOverrides));
+    localStorage.setItem(STORAGE_KEYS.STAGE_OVERRIDES, JSON.stringify(stageOverrides));
   }, [stageOverrides]);
 
   useEffect(() => {
-    localStorage.setItem('scorito_gt_formula_params', JSON.stringify(formulaParams));
+    localStorage.setItem(STORAGE_KEYS.FORMULA_PARAMS, JSON.stringify(formulaParams));
   }, [formulaParams]);
 
   useEffect(() => {
-    localStorage.setItem('scorito_gt_type_configs', JSON.stringify(typeConfigs));
+    localStorage.setItem(STORAGE_KEYS.TYPE_CONFIGS, JSON.stringify(typeConfigs));
   }, [typeConfigs]);
 
   const { budgetUsed, maxAffordablePrice } = useMemo(() => {
     const used = slots.reduce((sum, slot) => sum + (Number(slot.price) || 0), 0);
-    const emptySlotsCount = slots.filter(s => !s.name || s.name.trim() === '').length;
+    const emptySlotsCount = slots.filter(s => (Number(s.price) || 0) === 0).length;
     
     // Max we can spend on ONE rider is: Remaining Budget - (Remaining Slots - 1) * 500k
     const remainingBudget = MAX_BUDGET - used;
@@ -226,11 +228,7 @@ export function TeamProvider({ children }: { children: ReactNode }) {
   }, [slots, getOptimalDistribution]);
 
   const resetTeam = useCallback(() => {
-    if (window.confirm("Weet je zeker dat je je team wilt wisselen?")) {
-      setSlots(Array.from({ length: SLOTS_COUNT }, (_, i) => createEmptySlot(i)));
-      setStageOverrides({}); // Optional: also reset overrides? User probably just wants team reset.
-      // Keeping overrides for now as they are "parcours analysis".
-    }
+    setSlots(Array.from({ length: TEAM_SIZE }, (_, i) => createEmptySlot(i)));
   }, []);
 
   const addRider = useCallback((rider: Renner) => {
@@ -243,16 +241,12 @@ export function TeamProvider({ children }: { children: ReactNode }) {
   }, [slots, selectRiderForSlot]);
 
   const resetFormulaConfigs = useCallback(() => {
-    if (window.confirm("Weet je zeker dat je alle formule-instellingen (multipliers en D/End waarden) wilt terugzetten naar de standaard?")) {
-      setFormulaParams(giro2026.formulaParams);
-      setTypeConfigs(giro2026.typeConfigs);
-    }
+    setFormulaParams(giro2026.formulaParams);
+    setTypeConfigs(giro2026.typeConfigs);
   }, []);
 
   const resetStageOverrides = useCallback(() => {
-    if (window.confirm("Weet je zeker dat je alle handmatige etappe-aanpassingen wilt wissen en terug wilt naar de standaard-analyse?")) {
-      setStageOverrides({});
-    }
+    setStageOverrides({});
   }, []);
 
   return (

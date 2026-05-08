@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useTeam } from '../context/TeamContext';
-import { Etappe, RennerType } from '../types';
+import { useCommunity } from '../context/CommunityContext';
+import { Etappe, RennerType, RENNER_TYPES, TEAM_SIZE } from '../types';
+import { formatMoney } from '../utils/formatUtils';
 import { Autocomplete } from './Autocomplete';
 import { StartlistModal } from './StartlistModal';
 import { MobileTeamView } from './MobileTeamView';
@@ -24,8 +26,6 @@ interface TeamMatrixProps {
   stages: Etappe[];
 }
 
-const RENNER_TYPES: RennerType[] = ['GC', 'Klimmer', 'Sprinter', 'Sprint+', 'Aanvaller', 'Tijdrijder', 'Wildcard'];
-
 // Colors for synergy groups (2+ riders in same team)
 const SYNERGY_COLORS = [
     'border-amber-500/50 text-amber-400 bg-amber-500/10',
@@ -41,33 +41,31 @@ const SYNERGY_COLORS = [
 type SortField = 'name' | 'team' | 'price' | 'type' | 'default';
 
 export function TeamMatrix({ stages }: TeamMatrixProps) {
-    const { 
-        slots, 
-        budgetUsed, 
-        maxBudget, 
+    const {
+        slots,
+        budgetUsed,
+        maxBudget,
         maxAffordablePrice,
-        updateSlot, 
-        selectRiderForSlot, 
-        clearSlot, 
+        updateSlot,
+        selectRiderForSlot,
+        clearSlot,
         toggleLineup,
         getOptimalDistribution,
-        resetTeam 
+        resetTeam
     } = useTeam();
+    const { aggregatedVotes } = useCommunity();
 
     const [sortField, setSortField] = useState<SortField>('default');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [confirmReset, setConfirmReset] = useState(false);
 
     const isOverBudget = budgetUsed > maxBudget;
     const activeRidersCount = slots.filter(s => s.name.trim() !== '').length;
-    const remainingSlots = 20 - activeRidersCount;
+    const remainingSlots = TEAM_SIZE - activeRidersCount;
     const remainingBudget = maxBudget - budgetUsed;
     const avgPerSlot = remainingSlots > 0 ? remainingBudget / remainingSlots : 0;
     const budgetPercentage = Math.min(100, (budgetUsed / maxBudget) * 100);
-
-    const formatMoney = (val: number) => {
-        return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(val);
-    };
 
   // US-14: Identify team synergy
   const teamSynergy = useMemo(() => {
@@ -176,7 +174,7 @@ export function TeamMatrix({ stages }: TeamMatrixProps) {
                 </div>
 
                 <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
-                    <span className="text-neutral-500">{activeRidersCount} / 20 renners</span>
+                    <span className="text-neutral-500">{activeRidersCount} / {TEAM_SIZE} renners</span>
                     {remainingBudget >= 0 ? (
                         <span className="text-emerald-500">Nog {formatMoney(remainingBudget)} over</span>
                     ) : (
@@ -193,13 +191,31 @@ export function TeamMatrix({ stages }: TeamMatrixProps) {
                     <ListPlus className="w-5 h-5" />
                     Startlijst
                 </button>
-                <button 
-                    onClick={resetTeam}
-                    className="flex items-center gap-2 px-6 py-3 bg-neutral-800 text-neutral-300 border border-neutral-700 rounded-xl text-[12px] font-black uppercase tracking-wider hover:bg-neutral-700 hover:text-white transition-all transform hover:scale-[1.02] active:scale-95"
-                >
-                    <Trash2 className="w-5 h-5" />
-                    Reset
-                </button>
+                {confirmReset ? (
+                    <div className="flex items-center gap-2">
+                        <span className="text-[11px] text-neutral-400 font-bold">Zeker weten?</span>
+                        <button
+                            onClick={() => { resetTeam(); setConfirmReset(false); }}
+                            className="px-4 py-2 bg-red-500 text-white rounded-xl text-[11px] font-black uppercase tracking-wider hover:bg-red-400 transition-all active:scale-95"
+                        >
+                            Ja, wis
+                        </button>
+                        <button
+                            onClick={() => setConfirmReset(false)}
+                            className="px-4 py-2 bg-neutral-800 text-neutral-300 border border-neutral-700 rounded-xl text-[11px] font-black uppercase tracking-wider hover:bg-neutral-700 transition-all active:scale-95"
+                        >
+                            Annuleer
+                        </button>
+                    </div>
+                ) : (
+                    <button
+                        onClick={() => setConfirmReset(true)}
+                        className="flex items-center gap-2 px-6 py-3 bg-neutral-800 text-neutral-300 border border-neutral-700 rounded-xl text-[12px] font-black uppercase tracking-wider hover:bg-neutral-700 hover:text-white transition-all transform hover:scale-[1.02] active:scale-95"
+                    >
+                        <Trash2 className="w-5 h-5" />
+                        Reset
+                    </button>
+                )}
             </div>
         </div>
 
@@ -208,11 +224,12 @@ export function TeamMatrix({ stages }: TeamMatrixProps) {
 
       {/* MOBILE CARDS VIEW */}
       <div className="block lg:hidden mt-4">
-        <MobileTeamView 
-            stages={stages} 
-            teamSynergy={teamSynergy} 
-            SYNERGY_COLORS={SYNERGY_COLORS} 
-            RENNER_TYPES={RENNER_TYPES} 
+        <MobileTeamView
+            stages={stages}
+            teamSynergy={teamSynergy}
+            SYNERGY_COLORS={SYNERGY_COLORS}
+            RENNER_TYPES={RENNER_TYPES}
+            communityVotes={aggregatedVotes}
         />
       </div>
 
@@ -270,6 +287,7 @@ export function TeamMatrix({ stages }: TeamMatrixProps) {
                           onChange={(val) => updateSlot(slot.id, 'name', val)}
                           onSelect={(rider) => selectRiderForSlot(slot.id, rider)}
                           onClear={() => clearSlot(slot.id)}
+                          communityVotes={aggregatedVotes}
                         />
                         {allRiders.find(r => r.naam === slot.name)?.is_jongere && (
                           <span className="text-amber-500 font-black text-sm" title="Jongerenklassement">*</span>
