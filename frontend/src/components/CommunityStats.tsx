@@ -90,6 +90,8 @@ function Top5Panel({
     );
 }
 
+const BAR_MAX_PX = 96; // pixel height reserved for bars (total container = 128px, ~32px for labels)
+
 function DistributionChart({ data }: { data: { timesChosen: number; riderCount: number }[] }) {
     const maxCount = Math.max(...data.map(d => d.riderCount), 1);
     const sorted = [...data].sort((a, b) => b.timesChosen - a.timesChosen);
@@ -99,15 +101,15 @@ function DistributionChart({ data }: { data: { timesChosen: number; riderCount: 
             <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-4">
                 Verdeling per aantal keuzes
             </h3>
-            <div className="flex items-end gap-1 h-32">
+            <div className="flex items-end gap-1" style={{ height: '128px' }}>
                 {sorted.map(d => {
-                    const heightPct = (d.riderCount / maxCount) * 100;
+                    const barPx = Math.max(2, (d.riderCount / maxCount) * BAR_MAX_PX);
                     return (
-                        <div key={d.timesChosen} className="flex flex-col items-center gap-1 flex-1 min-w-0">
+                        <div key={d.timesChosen} className="flex flex-col items-center gap-1 flex-1 min-w-0 justify-end">
                             <span className="text-[9px] text-neutral-400 leading-none">{d.riderCount}</span>
                             <div
                                 className="w-full bg-pink-500 rounded-t-sm"
-                                style={{ height: `${heightPct}%`, minHeight: '2px' }}
+                                style={{ height: `${barPx}px` }}
                             />
                             <span className="text-[9px] text-neutral-500 leading-none">{d.timesChosen}</span>
                         </div>
