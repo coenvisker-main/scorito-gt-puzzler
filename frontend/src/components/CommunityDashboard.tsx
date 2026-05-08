@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { useCommunity } from '../context/CommunityContext';
 import { riders } from '../data/riders';
 import { Pagination } from './Pagination';
-import { Link, Users, Star, Gem, Check, LogOut, Loader2, Globe } from 'lucide-react';
+import { CommunityStats } from './CommunityStats';
+import { Link, Users, Star, Gem, Check, LogOut, Loader2, Globe, BarChart3, MessageSquare, CheckCircle2 } from 'lucide-react';
 
 export function CommunityDashboard() {
-    const { currentGroup, currentUser, votes, createGroup, joinGroup, leaveGroup, submitVotes, isLoading, aggregatedVotes, error } = useCommunity();
+    const { currentGroup, currentUser, votes, createGroup, joinGroup, leaveGroup, submitVotes, isLoading, aggregatedVotes, submittedTeams, mySubmittedTeam, communityStats, error } = useCommunity();
     const [groupName, setGroupName] = useState('');
     const [userName, setUserName] = useState('');
     const [joinGroupId, setJoinGroupId] = useState<string | null>(null);
@@ -14,6 +15,7 @@ export function CommunityDashboard() {
     const [gemPage, setGemPage] = useState(0);
     const [gemSearch, setGemSearch] = useState('');
     const [voteStatus, setVoteStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+    const [communityTab, setCommunityTab] = useState<'stemmen' | 'statistieken'>('stemmen');
     const PAGE_SIZE = 10;
 
     // Voting state
@@ -195,7 +197,7 @@ export function CommunityDashboard() {
     }
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
+        <div className="max-w-6xl mx-auto space-y-6">
             {/* Header */}
             <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-6">
                 <div className="text-center sm:text-left">
@@ -203,17 +205,24 @@ export function CommunityDashboard() {
                         <Users className="text-amber-500 w-5 h-5 sm:w-6 sm:h-6" />
                         {currentGroup.name}
                     </h2>
-                    <p className="text-neutral-400 text-xs sm:text-sm mt-1">Ingelogd als <span className="font-bold text-amber-500">{currentUser}</span></p>
+                    <div className="flex items-center justify-center sm:justify-start gap-3 mt-1 flex-wrap">
+                        <p className="text-neutral-400 text-xs sm:text-sm">Ingelogd als <span className="font-bold text-amber-500">{currentUser}</span></p>
+                        {submittedTeams.length > 0 && (
+                            <span className="text-[10px] font-bold bg-pink-500/15 text-pink-400 border border-pink-800/40 rounded-full px-2 py-0.5">
+                                {submittedTeams.length} team{submittedTeams.length !== 1 ? 's' : ''} ingediend
+                            </span>
+                        )}
+                    </div>
                 </div>
                 <div className="flex items-center gap-2 w-full sm:w-auto">
-                    <button 
+                    <button
                         onClick={handleCopyLink}
                         className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white px-4 py-2 sm:py-2.5 rounded-xl text-sm font-bold transition-colors"
                     >
                         {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Link className="w-3.5 h-3.5" />}
                         {copied ? 'Gekopieerd' : 'Deel Link'}
                     </button>
-                    <button 
+                    <button
                         onClick={leaveGroup}
                         className="flex items-center justify-center p-2 sm:p-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl transition-colors"
                         title="Groep verlaten"
@@ -222,6 +231,50 @@ export function CommunityDashboard() {
                     </button>
                 </div>
             </div>
+
+            {/* My team banner */}
+            {mySubmittedTeam && (
+                <div className="flex items-center gap-2 text-sm text-emerald-300 bg-emerald-950/40 border border-emerald-800/40 rounded-xl px-4 py-3">
+                    <CheckCircle2 size={15} className="shrink-0 text-emerald-400" />
+                    Jouw team is ingediend op{' '}
+                    <strong>{new Date(mySubmittedTeam.updated_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })}</strong>
+                    <span className="text-neutral-500 text-xs ml-1">— bijwerken kan via de Teambuilder</span>
+                </div>
+            )}
+
+            {/* Internal tabs */}
+            <div className="flex gap-2 border-b border-neutral-800 pb-0">
+                <button
+                    onClick={() => setCommunityTab('stemmen')}
+                    className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold rounded-t-lg border-b-2 transition-colors ${
+                        communityTab === 'stemmen'
+                            ? 'border-amber-500 text-amber-400 bg-amber-500/5'
+                            : 'border-transparent text-neutral-500 hover:text-neutral-300'
+                    }`}
+                >
+                    <MessageSquare size={14} /> Shortlist Stemmen
+                </button>
+                <button
+                    onClick={() => setCommunityTab('statistieken')}
+                    className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold rounded-t-lg border-b-2 transition-colors ${
+                        communityTab === 'statistieken'
+                            ? 'border-pink-500 text-pink-400 bg-pink-500/5'
+                            : 'border-transparent text-neutral-500 hover:text-neutral-300'
+                    }`}
+                >
+                    <BarChart3 size={14} /> Team Statistieken
+                    {submittedTeams.length > 0 && (
+                        <span className="ml-1 bg-pink-500/20 text-pink-400 text-[10px] font-bold rounded-full px-1.5 py-0.5">
+                            {submittedTeams.length}
+                        </span>
+                    )}
+                </button>
+            </div>
+
+            {/* Tab content */}
+            {communityTab === 'statistieken' ? (
+                <CommunityStats stats={communityStats ?? { totalTeams: 0, totalUniqueRiders: 0, avgSelectionsPerRider: 0, mostUniqueRiders: 0, moreThanHalfCount: 0, topBoven: [], topMidden: [], topOnder: [], leastChosen: [], distributionByCount: [], percentageGroups: [], allRiderStats: [] }} />
+            ) : (
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Voting Section */}
@@ -409,6 +462,7 @@ export function CommunityDashboard() {
                     </div>
                 </div>
             </div>
+            )} {/* end stemmen tab */}
         </div>
     );
 }
