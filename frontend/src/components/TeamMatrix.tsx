@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { useTeam } from '../context/TeamContext';
 import { useCommunity } from '../context/CommunityContext';
 import { Etappe, RennerType, RENNER_TYPES, TEAM_SIZE } from '../types';
@@ -8,17 +8,21 @@ import { StartlistModal } from './StartlistModal';
 import { MobileTeamView } from './MobileTeamView';
 import { DistributionSummary } from './DistributionSummary';
 import { riders as allRiders } from '../data/riders';
-import { 
-  Trash2, 
-  Crown, 
-  Euro, 
+import {
+  Trash2,
+  Crown,
+  Euro,
   AlertCircle,
   Users,
   Trophy,
   ArrowUpDown,
   BarChart3,
   Link2,
-  ListPlus
+  ListPlus,
+  CheckCircle2,
+  XCircle,
+  Send,
+  RefreshCw
 } from 'lucide-react';
 
 
@@ -53,12 +57,13 @@ export function TeamMatrix({ stages }: TeamMatrixProps) {
         getOptimalDistribution,
         resetTeam
     } = useTeam();
-    const { aggregatedVotes } = useCommunity();
+    const { aggregatedVotes, currentGroup, submitTeam, mySubmittedTeam, isSubmittingTeam } = useCommunity();
 
     const [sortField, setSortField] = useState<SortField>('default');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [confirmReset, setConfirmReset] = useState(false);
+    const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
     const isOverBudget = budgetUsed > maxBudget;
     const activeRidersCount = slots.filter(s => s.name.trim() !== '').length;
@@ -131,6 +136,12 @@ export function TeamMatrix({ stages }: TeamMatrixProps) {
   const getRiderStageCount = (slotLineup: Record<number, string>) => {
     return Object.values(slotLineup).filter(s => s === 'X' || s === 'K').length;
   };
+
+  const handleSubmitTeam = useCallback(async () => {
+    const ok = await submitTeam(slots);
+    setSubmitStatus(ok ? 'success' : 'error');
+    if (ok) setTimeout(() => setSubmitStatus('idle'), 4000);
+  }, [submitTeam, slots]);
 
   return (
     <div className="flex flex-col space-y-4 pb-48 max-w-7xl mx-auto">
@@ -395,9 +406,74 @@ export function TeamMatrix({ stages }: TeamMatrixProps) {
         </div>
       </div>
       
-      <StartlistModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      {/* Team Definitief Maken */}
+      <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-5">
+        <h2 className="text-base font-bold text-white mb-4 flex items-center gap-2">
+          <Send size={16} className="text-pink-400" />
+          Team Definitief Maken
+        </h2>
+
+        {/* Checklist */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+          {[
+            { ok: activeRidersCount === TEAM_SIZE, label: `${activeRidersCount}/20 renners geselecteerd` },
+            { ok: !isOverBudget, label: isOverBudget ? 'Budget overschreden' : 'Binnen budget' },
+            { ok: !!currentGroup, label: currentGroup ? `Groep: ${currentGroup.name}` : 'Niet in een groep' },
+          ].map(({ ok, label }) => (
+            <div key={label} className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm ${ok ? 'bg-emerald-950/50 text-emerald-300 border border-emerald-800/50' : 'bg-neutral-800 text-neutral-400 border border-neutral-700'}`}>
+              {ok
+                ? <CheckCircle2 size={14} className="shrink-0 text-emerald-400" />
+                : <XCircle size={14} className="shrink-0 text-neutral-500" />}
+              {label}
+            </div>
+          ))}
+        </div>
+
+        {!currentGroup && (
+          <p className="text-xs text-neutral-500 mb-4">
+            Ga naar het <span className="text-pink-400 font-semibold">Community</span>-tabblad om een groep aan te maken of te joinen.
+          </p>
+        )}
+
+        {/* Previously submitted banner */}
+        {mySubmittedTeam && (
+          <div className="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 rounded-lg px-3 py-2 mb-4">
+            <CheckCircle2 size={13} className="shrink-0" />
+            Ingediend op {new Date(mySubmittedTeam.updated_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+            <span className="ml-1 text-neutral-500">— klik om te bijwerken</span>
+          </div>
+        )}
+
+        {/* Submit feedback */}
+        {submitStatus === 'success' && (
+          <div className="flex items-center gap-2 text-sm text-emerald-300 bg-emerald-950/50 border border-emerald-700/50 rounded-lg px-3 py-2 mb-4">
+            <CheckCircle2 size={15} /> Team opgeslagen voor <strong>{currentGroup?.name}</strong>!
+          </div>
+        )}
+        {submitStatus === 'error' && (
+          <div className="flex items-center gap-2 text-sm text-red-300 bg-red-950/50 border border-red-800/50 rounded-lg px-3 py-2 mb-4">
+            <XCircle size={15} /> Er ging iets mis. Probeer opnieuw.
+          </div>
+        )}
+
+        <button
+          onClick={handleSubmitTeam}
+          disabled={activeRidersCount !== TEAM_SIZE || isOverBudget || !currentGroup || isSubmittingTeam}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-sm transition-all
+            bg-pink-600 hover:bg-pink-500 text-white
+            disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-pink-600"
+        >
+          {isSubmittingTeam
+            ? <><RefreshCw size={14} className="animate-spin" /> Opslaan...</>
+            : mySubmittedTeam
+              ? <><RefreshCw size={14} /> Team Bijwerken</>
+              : <><Send size={14} /> Team Definitief Maken</>}
+        </button>
+      </div>
+
+      <StartlistModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
       />
     </div>
   );

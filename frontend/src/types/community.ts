@@ -21,3 +21,48 @@ export interface AggregatedVotes {
         gemCount: number; // How many marked as gem
     }
 }
+
+export interface SubmittedRiderSlot {
+    riderId: string;
+    name: string;
+    team: string;
+    price: number;
+    type: string;
+}
+
+export interface SubmittedTeam {
+    id: string;
+    group_id: string;
+    user_name: string;
+    riders: SubmittedRiderSlot[];
+    budget_used: number;
+    submitted_at: string;
+    updated_at: string;
+}
+
+export interface RiderPickStats {
+    riderId: string;
+    name: string;
+    team: string;
+    price: number;
+    pickCount: number;
+    pickPct: number; // 0-100
+}
+
+export interface CommunityTeamStats {
+    totalTeams: number;
+    totalUniqueRiders: number;
+    avgSelectionsPerRider: number;
+    mostUniqueRiders: number;
+    moreThanHalfCount: number;
+
+    topBoven: RiderPickStats[];
+    topMidden: RiderPickStats[];
+    topOnder: RiderPickStats[];
+    leastChosen: RiderPickStats[];
+
+    distributionByCount: { timesChosen: number; riderCount: number }[];
+    percentageGroups: { label: string; count: number }[];
+
+    allRiderStats: RiderPickStats[];
+}
