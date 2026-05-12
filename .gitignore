@@ -10,6 +10,10 @@ vite.config.d.ts
 # Local env
 .env
 .env.local
+scripts/.env
+
+# Sprint 0 test artefacten
+scripts/test_pcs_raw_results.json
 
 # OS
 .DS_Store

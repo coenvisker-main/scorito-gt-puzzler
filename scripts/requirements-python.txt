@@ -1,0 +1,4 @@
+cloudscraper
+beautifulsoup4
+procyclingstats>=0.2.7
+supabase
