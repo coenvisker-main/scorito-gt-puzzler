@@ -52,31 +52,23 @@ const JERSEY_HIERARCHY: Array<{ key: keyof Omit<JerseyHolders, 'stageWinner'>; p
   { key: 'jong',   punten: 3 },
 ];
 
-function calcTeamPoints(slotTeam: string, jerseys: JerseyHolders): number {
+// excludeRiderId: the slot's own rider — never earns team pts from their own jersey wins
+function calcTeamPoints(slotTeam: string, jerseys: JerseyHolders, excludeRiderId: string): number {
   let total = 0;
 
-  // Stage win bonus — separate from jersey hierarchy
-  if (jerseys.stageWinner?.team === slotTeam) {
+  // Stage win bonus
+  if (
+    jerseys.stageWinner?.team === slotTeam &&
+    jerseys.stageWinner.riderId !== excludeRiderId
+  ) {
     total += 10;
   }
 
-  // Build riderId → highest jersey points map (ordered highest→lowest, first entry wins)
-  const riderHighestPts: Record<string, number> = {};
+  // Each jersey type counts independently (cumulative, niet per-holder-highest)
   for (const { key, punten } of JERSEY_HIERARCHY) {
     const holder = jerseys[key];
-    if (!holder) continue;
-    if (riderHighestPts[holder.riderId] === undefined) {
-      riderHighestPts[holder.riderId] = punten;
-    }
-  }
-
-  // For each jersey in hierarchy order: if holder is from slotTeam, add their highest pts once
-  const counted = new Set<string>();
-  for (const { key } of JERSEY_HIERARCHY) {
-    const holder = jerseys[key];
-    if (!holder || holder.team !== slotTeam || counted.has(holder.riderId)) continue;
-    total += riderHighestPts[holder.riderId];
-    counted.add(holder.riderId);
+    if (!holder || holder.team !== slotTeam || holder.riderId === excludeRiderId) continue;
+    total += punten;
   }
 
   return total;
@@ -102,7 +94,7 @@ export function calculatePersonalizedScores(
       const jerseys = jerseyHolders[stageNum] ?? {};
 
       const punten_kopman_bonus = opgesteld && lineupStatus === 'K' ? base.punten_etappe : 0;
-      const punten_team = opgesteld ? calcTeamPoints(slot.team, jerseys) : 0;
+      const punten_team = opgesteld ? calcTeamPoints(slot.team, jerseys, slot.riderId) : 0;
 
       const totaal = opgesteld
         ? base.punten_etappe + punten_kopman_bonus
