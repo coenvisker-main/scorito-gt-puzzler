@@ -143,6 +143,36 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
+    // POST /api/import-stage/:nummer  (nummer = "1"-"21" of "all")
+    const importMatch = req.url.match(/^\/api\/import-stage\/(\w+)$/);
+    if (importMatch && req.method === 'POST') {
+        const nummer = importMatch[1];
+        // Valideer input
+        if (nummer !== 'all' && (isNaN(parseInt(nummer)) || parseInt(nummer) < 1 || parseInt(nummer) > 21)) {
+            res.writeHead(400);
+            res.end(JSON.stringify({ error: `Ongeldig etappenummer: ${nummer}` }));
+            return;
+        }
+        const scriptPath = path.resolve(__dirname, '../scripts/import_stage_results.py');
+        console.log(`[AdminAPI] Importeren etappe ${nummer}...`);
+        exec(
+            `python "${scriptPath}" ${nummer}`,
+            { timeout: 300000 },
+            (error, stdout, stderr) => {
+                if (error) {
+                    console.error(`[AdminAPI] Import fout: ${error.message}`);
+                    res.writeHead(500);
+                    res.end(JSON.stringify({ error: error.message, stderr, output: stdout }));
+                    return;
+                }
+                console.log(`[AdminAPI] Import etappe ${nummer} klaar.`);
+                res.writeHead(200);
+                res.end(JSON.stringify({ success: true, output: stdout }));
+            }
+        );
+        return;
+    }
+
     // Fallback
     res.writeHead(404);
     res.end(JSON.stringify({ error: 'Not found' }));

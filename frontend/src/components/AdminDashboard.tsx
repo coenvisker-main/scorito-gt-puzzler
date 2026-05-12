@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Database, DownloadCloud, Search, RefreshCw, Save, Lock, Settings2, Info } from 'lucide-react';
+import { Database, DownloadCloud, Search, RefreshCw, Save, Lock, Settings2, Info, CheckCircle2, Clock } from 'lucide-react';
+import { supabase } from '../utils/supabaseClient';
 import { Renner, RennerType, TypeConfig, FormulaParams, RENNER_TYPES } from '../types';
 import { riders as initialRiders } from '../data/riders';
 
@@ -27,9 +28,46 @@ export function AdminDashboard() {
     const [confirmAction, setConfirmAction] = useState<'formula' | 'analysis' | null>(null);
     const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
+    // Etappe import state
+    const [importedStages, setImportedStages] = useState<Set<number>>(new Set());
+    const [importingStage, setImportingStage] = useState<number | 'all' | null>(null);
+    const [lastImportOutput, setLastImportOutput] = useState<string | null>(null);
+
     const showNotification = (type: 'success' | 'error', message: string) => {
         setNotification({ type, message });
         setTimeout(() => setNotification(null), 3000);
+    };
+
+    const fetchImportedStages = async () => {
+        try {
+            const { data } = await supabase.from('stage_results').select('stage_number');
+            if (data) {
+                setImportedStages(new Set(data.map((r: { stage_number: number }) => r.stage_number)));
+            }
+        } catch (e) {
+            console.error('Kon import-status niet ophalen', e);
+        }
+    };
+
+    const handleImportStage = async (nummer: number | 'all') => {
+        setImportingStage(nummer);
+        setLastImportOutput(null);
+        try {
+            const res = await fetch(`${API_BASE}/api/import-stage/${nummer}`, { method: 'POST' });
+            const data = await res.json();
+            setLastImportOutput(data.output ?? data.error ?? 'Geen output');
+            if (data.success) {
+                await fetchImportedStages();
+                showNotification('success', nummer === 'all' ? 'Inhaalimport succesvol!' : `Etappe ${nummer} geïmporteerd`);
+            } else {
+                showNotification('error', `Import mislukt: ${data.error ?? 'Onbekende fout'}`);
+            }
+        } catch (e) {
+            showNotification('error', `Netwerkfout: ${e}`);
+            setLastImportOutput(`Netwerkfout: ${e}`);
+        } finally {
+            setImportingStage(null);
+        }
     };
 
     useEffect(() => {
@@ -47,6 +85,7 @@ export function AdminDashboard() {
             } catch (e) {
                 setIsApiAvailable(false);
             }
+            await fetchImportedStages();
         };
         init();
     }, []);
@@ -529,6 +568,81 @@ export function AdminDashboard() {
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            {/* Etappe Resultaten Import Card */}
+            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-2xl">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h3 className="text-xl font-black tracking-tighter text-white uppercase italic">Etappe Resultaten</h3>
+                        <p className="text-neutral-500 text-xs font-bold uppercase tracking-wider mt-1">
+                            PCS → Supabase import per etappe
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => handleImportStage('all')}
+                        disabled={importingStage !== null || !isApiAvailable}
+                        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black uppercase tracking-wider text-xs transition-all shadow-lg ${
+                            importingStage !== null || !isApiAvailable
+                                ? 'bg-neutral-800 text-neutral-500 cursor-not-allowed'
+                                : 'bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500 hover:text-black hover:scale-105'
+                        }`}
+                    >
+                        {importingStage === 'all'
+                            ? <><RefreshCw className="w-4 h-4 animate-spin" /> Importeren...</>
+                            : <><DownloadCloud className="w-4 h-4" /> Importeer alle gereden etappes</>
+                        }
+                    </button>
+                </div>
+
+                {isApiAvailable === false && (
+                    <div className="mb-4 p-3 bg-blue-950/50 border border-blue-800/50 rounded-xl flex items-center gap-3">
+                        <Lock className="w-4 h-4 text-blue-400 shrink-0" />
+                        <p className="text-blue-300 text-xs font-bold">Read-only modus — import werkt alleen lokaal.</p>
+                    </div>
+                )}
+
+                {/* Stage buttons grid */}
+                <div className="grid grid-cols-7 gap-2 mb-4">
+                    {Array.from({ length: 21 }, (_, i) => i + 1).map(n => {
+                        const isImported = importedStages.has(n);
+                        const isLoading = importingStage === n;
+                        const isDisabled = importingStage !== null || !isApiAvailable;
+
+                        return (
+                            <button
+                                key={n}
+                                onClick={() => handleImportStage(n)}
+                                disabled={isDisabled}
+                                title={isImported ? `Etappe ${n} — opnieuw importeren` : `Etappe ${n} importeren`}
+                                className={`relative flex flex-col items-center justify-center p-2 rounded-xl text-xs font-black transition-all ${
+                                    isLoading
+                                        ? 'bg-amber-500/10 border border-amber-500/30 text-amber-400'
+                                        : isImported
+                                        ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-white'
+                                        : isDisabled
+                                        ? 'bg-neutral-950 border border-neutral-800 text-neutral-600 cursor-not-allowed'
+                                        : 'bg-neutral-950 border border-neutral-800 text-neutral-400 hover:border-neutral-600 hover:text-white'
+                                }`}
+                            >
+                                {isLoading
+                                    ? <RefreshCw className="w-3 h-3 animate-spin mb-0.5" />
+                                    : isImported
+                                    ? <CheckCircle2 className="w-3 h-3 mb-0.5" />
+                                    : <Clock className="w-3 h-3 mb-0.5 opacity-40" />
+                                }
+                                <span>{n}</span>
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {/* Output log */}
+                {lastImportOutput && (
+                    <div className="mt-2 p-4 bg-neutral-950 border border-neutral-800 rounded-xl text-amber-400 text-xs font-mono whitespace-pre-wrap max-h-48 overflow-y-auto">
+                        {lastImportOutput}
+                    </div>
+                )}
             </div>
         </div>
     );
