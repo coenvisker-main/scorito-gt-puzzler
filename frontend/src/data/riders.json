@@ -82,7 +82,7 @@
     {
         "id": "thymen-arensman",
         "naam": "ARENSMAN Thymen",
-        "ploeg": "Netcompany INEOS Cycling Team",
+        "ploeg": "Netcompany INEOS",
         "scorito_categorie": "Onbekend",
         "gebruiker_type": "GC",
         "prijs": 2500000,
@@ -102,7 +102,7 @@
     {
         "id": "kaden-groves",
         "naam": "GROVES Kaden",
-        "ploeg": "Alpecin-Premier Tech",
+        "ploeg": "Alpecin - Premier Tech",
         "scorito_categorie": "Onbekend",
         "gebruiker_type": "Sprinter",
         "prijs": 2500000,
@@ -222,7 +222,7 @@
     {
         "id": "egan-bernal",
         "naam": "BERNAL Egan",
-        "ploeg": "Netcompany INEOS Cycling Team",
+        "ploeg": "Netcompany INEOS",
         "scorito_categorie": "Onbekend",
         "gebruiker_type": "GC",
         "prijs": 1500000,
@@ -272,7 +272,7 @@
     {
         "id": "filippo-ganna",
         "naam": "GANNA Filippo",
-        "ploeg": "Netcompany INEOS Cycling Team",
+        "ploeg": "Netcompany INEOS",
         "scorito_categorie": "Onbekend",
         "gebruiker_type": "Tijdrijder",
         "prijs": 1500000,
@@ -350,16 +350,6 @@
         "is_jongere": true
     },
     {
-        "id": "matevz-govekar",
-        "naam": "GOVEKAR Matevž",
-        "ploeg": "Bahrain - Victorious",
-        "scorito_categorie": "Onbekend",
-        "gebruiker_type": "Sprinter",
-        "prijs": 1000000,
-        "is_actief": true,
-        "is_jongere": false
-    },
-    {
         "id": "giovanni-lonardi",
         "naam": "LONARDI Giovanni",
         "ploeg": "Team Polti VisitMalta",
@@ -378,6 +368,16 @@
         "prijs": 1000000,
         "is_actief": true,
         "is_jongere": false
+    },
+    {
+        "id": "madis-mihkels",
+        "naam": "MIHKELS Madis",
+        "ploeg": "EF Education - EasyPost",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 1000000,
+        "is_actief": true,
+        "is_jongere": true
     },
     {
         "id": "matteo-moschetti",
@@ -442,7 +442,7 @@
     {
         "id": "ben-turner",
         "naam": "TURNER Ben",
-        "ploeg": "Netcompany INEOS Cycling Team",
+        "ploeg": "Netcompany INEOS",
         "scorito_categorie": "Onbekend",
         "gebruiker_type": "Sprinter",
         "prijs": 1000000,
@@ -532,7 +532,7 @@
     {
         "id": "jensen-plowright",
         "naam": "PLOWRIGHT Jensen",
-        "ploeg": "Alpecin-Premier Tech",
+        "ploeg": "Alpecin - Premier Tech",
         "scorito_categorie": "Onbekend",
         "gebruiker_type": "Wildcard",
         "prijs": 750000,
@@ -552,7 +552,7 @@
     {
         "id": "magnus-sheffield",
         "naam": "SHEFFIELD Magnus",
-        "ploeg": "Netcompany INEOS Cycling Team",
+        "ploeg": "Netcompany INEOS",
         "scorito_categorie": "Onbekend",
         "gebruiker_type": "Wildcard",
         "prijs": 750000,
@@ -660,6 +660,16 @@
         "is_jongere": false
     },
     {
+        "id": "warren-barguil",
+        "naam": "BARGUIL Warren",
+        "ploeg": "Team Picnic PostNL",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true,
+        "is_jongere": false
+    },
+    {
         "id": "william-barta",
         "naam": "BARTA Will",
         "ploeg": "Tudor Pro Cycling Team",
@@ -712,7 +722,7 @@
     {
         "id": "tobias-bayer",
         "naam": "BAYER Tobias",
-        "ploeg": "Alpecin-Premier Tech",
+        "ploeg": "Alpecin - Premier Tech",
         "scorito_categorie": "Onbekend",
         "gebruiker_type": "Wildcard",
         "prijs": 500000,
@@ -720,9 +730,29 @@
         "is_jongere": false
     },
     {
+        "id": "markel-beloki",
+        "naam": "BELOKI Markel",
+        "ploeg": "EF Education - EasyPost",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true,
+        "is_jongere": true
+    },
+    {
         "id": "alberto-bettiol",
         "naam": "BETTIOL Alberto",
         "ploeg": "XDS Astana Team",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true,
+        "is_jongere": false
+    },
+    {
+        "id": "mikkel-bjerg",
+        "naam": "BJERG Mikkel",
+        "ploeg": "UAE Team Emirates - XRG",
         "scorito_categorie": "Onbekend",
         "gebruiker_type": "Wildcard",
         "prijs": 500000,
@@ -742,7 +772,7 @@
     {
         "id": "francesco-busatto",
         "naam": "BUSATTO Francesco",
-        "ploeg": "Alpecin-Premier Tech",
+        "ploeg": "Alpecin - Premier Tech",
         "scorito_categorie": "Onbekend",
         "gebruiker_type": "Wildcard",
         "prijs": 500000,
@@ -790,16 +820,6 @@
         "is_jongere": true
     },
     {
-        "id": "jasper-de-buyst",
-        "naam": "DE BUYST Jasper",
-        "ploeg": "Lotto Intermarché",
-        "scorito_categorie": "Onbekend",
-        "gebruiker_type": "Wildcard",
-        "prijs": 500000,
-        "is_actief": true,
-        "is_jongere": false
-    },
-    {
         "id": "timo-de-jong",
         "naam": "DE JONG Timo",
         "ploeg": "Team Picnic PostNL",
@@ -823,6 +843,16 @@
         "id": "hartthijs-de-vries",
         "naam": "DE VRIES Hartthijs",
         "ploeg": "Unibet Rose Rockets",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true,
+        "is_jongere": false
+    },
+    {
+        "id": "nico-denz",
+        "naam": "DENZ Nico",
+        "ploeg": "Red Bull - BORA - hansgrohe",
         "scorito_categorie": "Onbekend",
         "gebruiker_type": "Wildcard",
         "prijs": 500000,
@@ -880,16 +910,6 @@
         "is_jongere": true
     },
     {
-        "id": "karsten-larsen-feldmann",
-        "naam": "FELDMANN Karsten Larsen",
-        "ploeg": "Unibet Rose Rockets",
-        "scorito_categorie": "Onbekend",
-        "gebruiker_type": "Wildcard",
-        "prijs": 500000,
-        "is_actief": true,
-        "is_jongere": true
-    },
-    {
         "id": "sean-flynn",
         "naam": "FLYNN Sean",
         "ploeg": "Team Picnic PostNL",
@@ -932,12 +952,22 @@
     {
         "id": "jonas-geens",
         "naam": "GEENS Jonas",
-        "ploeg": "Alpecin-Premier Tech",
+        "ploeg": "Alpecin - Premier Tech",
         "scorito_categorie": "Onbekend",
         "gebruiker_type": "Wildcard",
         "prijs": 500000,
         "is_actief": true,
         "is_jongere": false
+    },
+    {
+        "id": "joshua-giddings",
+        "naam": "GIDDINGS Joshua",
+        "ploeg": "Lotto Intermarché",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true,
+        "is_jongere": true
     },
     {
         "id": "david-gonzalez-lopez",
@@ -972,7 +1002,7 @@
     {
         "id": "jack-haig",
         "naam": "HAIG Jack",
-        "ploeg": "Netcompany INEOS Cycling Team",
+        "ploeg": "Netcompany INEOS",
         "scorito_categorie": "Onbekend",
         "gebruiker_type": "Wildcard",
         "prijs": 500000,
@@ -1080,19 +1110,9 @@
         "is_jongere": true
     },
     {
-        "id": "james-knox",
-        "naam": "KNOX James",
-        "ploeg": "Team Picnic PostNL",
-        "scorito_categorie": "Onbekend",
-        "gebruiker_type": "Wildcard",
-        "prijs": 500000,
-        "is_actief": true,
-        "is_jongere": false
-    },
-    {
-        "id": "mathieu-kockelmann",
-        "naam": "KOCKELMANN Mathieu",
-        "ploeg": "Lotto Intermarché",
+        "id": "matyas-kopecky",
+        "naam": "KOPECKÝ Matyáš",
+        "ploeg": "Unibet Rose Rockets",
         "scorito_categorie": "Onbekend",
         "gebruiker_type": "Wildcard",
         "prijs": 500000,
@@ -1153,6 +1173,16 @@
         "id": "andreas-leknessund",
         "naam": "LEKNESSUND Andreas",
         "ploeg": "Uno-X Mobility",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true,
+        "is_jongere": false
+    },
+    {
+        "id": "fabian-lienhard",
+        "naam": "LIENHARD Fabian",
+        "ploeg": "Tudor Pro Cycling Team",
         "scorito_categorie": "Onbekend",
         "gebruiker_type": "Wildcard",
         "prijs": 500000,
@@ -1382,7 +1412,7 @@
     {
         "id": "edward-planckaert",
         "naam": "PLANCKAERT Edward",
-        "ploeg": "Alpecin-Premier Tech",
+        "ploeg": "Alpecin - Premier Tech",
         "scorito_categorie": "Onbekend",
         "gebruiker_type": "Wildcard",
         "prijs": 500000,
@@ -1402,17 +1432,7 @@
     {
         "id": "johan-price-pejtersen",
         "naam": "PRICE-PEJTERSEN Johan",
-        "ploeg": "Alpecin-Premier Tech",
-        "scorito_categorie": "Onbekend",
-        "gebruiker_type": "Wildcard",
-        "prijs": 500000,
-        "is_actief": true,
-        "is_jongere": false
-    },
-    {
-        "id": "sean-quinn",
-        "naam": "QUINN Sean",
-        "ploeg": "EF Education - EasyPost",
+        "ploeg": "Alpecin - Premier Tech",
         "scorito_categorie": "Onbekend",
         "gebruiker_type": "Wildcard",
         "prijs": 500000,
@@ -1570,9 +1590,9 @@
         "is_jongere": true
     },
     {
-        "id": "liam-slock",
-        "naam": "SLOCK Liam",
-        "ploeg": "Lotto Intermarché",
+        "id": "dion-smith",
+        "naam": "SMITH Dion",
+        "ploeg": "NSN Cycling Team",
         "scorito_categorie": "Onbekend",
         "gebruiker_type": "Wildcard",
         "prijs": 500000,
@@ -1580,9 +1600,9 @@
         "is_jongere": false
     },
     {
-        "id": "dion-smith",
-        "naam": "SMITH Dion",
-        "ploeg": "NSN Cycling Team",
+        "id": "robert-stannard",
+        "naam": "STANNARD Robert",
+        "ploeg": "Bahrain - Victorious",
         "scorito_categorie": "Onbekend",
         "gebruiker_type": "Wildcard",
         "prijs": 500000,
@@ -1632,7 +1652,7 @@
     {
         "id": "embret-svestad-bardseng",
         "naam": "SVESTAD-BÅRDSENG Embret",
-        "ploeg": "Netcompany INEOS Cycling Team",
+        "ploeg": "Netcompany INEOS",
         "scorito_categorie": "Onbekend",
         "gebruiker_type": "Wildcard",
         "prijs": 500000,
@@ -1642,7 +1662,7 @@
     {
         "id": "connor-swift",
         "naam": "SWIFT Connor",
-        "ploeg": "Netcompany INEOS Cycling Team",
+        "ploeg": "Netcompany INEOS",
         "scorito_categorie": "Onbekend",
         "gebruiker_type": "Wildcard",
         "prijs": 500000,
@@ -1690,16 +1710,6 @@
         "is_jongere": true
     },
     {
-        "id": "luke-tuckwell",
-        "naam": "TUCKWELL Luke",
-        "ploeg": "Red Bull - BORA - hansgrohe",
-        "scorito_categorie": "Onbekend",
-        "gebruiker_type": "Wildcard",
-        "prijs": 500000,
-        "is_actief": true,
-        "is_jongere": true
-    },
-    {
         "id": "filippo-turconi",
         "naam": "TURCONI Filippo",
         "ploeg": "Bardiani CSF 7 Saber",
@@ -1713,6 +1723,16 @@
         "id": "michael-valgren-andersen",
         "naam": "VALGREN Michael",
         "ploeg": "EF Education - EasyPost",
+        "scorito_categorie": "Onbekend",
+        "gebruiker_type": "Wildcard",
+        "prijs": 500000,
+        "is_actief": true,
+        "is_jongere": false
+    },
+    {
+        "id": "fabio-van-den-bossche",
+        "naam": "VAN DEN BOSSCHE Fabio",
+        "ploeg": "Soudal Quick-Step",
         "scorito_categorie": "Onbekend",
         "gebruiker_type": "Wildcard",
         "prijs": 500000,
@@ -1772,7 +1792,7 @@
     {
         "id": "luca-vergallito",
         "naam": "VERGALLITO Luca",
-        "ploeg": "Alpecin-Premier Tech",
+        "ploeg": "Alpecin - Premier Tech",
         "scorito_categorie": "Onbekend",
         "gebruiker_type": "Wildcard",
         "prijs": 500000,
