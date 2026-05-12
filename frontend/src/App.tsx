@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { LayoutDashboard, Users, Trophy, Database, Globe } from 'lucide-react';
 import { StageList } from './components/StageList';
-import { TeamMatrix } from './components/TeamMatrix';
+import { TeamSection } from './components/TeamSection';
 import { AdminDashboard } from './components/AdminDashboard';
 import { CommunityDashboard } from './components/CommunityDashboard';
 import { giro2026 } from './data/giro2026';
@@ -9,9 +9,17 @@ import { TeamProvider } from './context/TeamContext';
 import { CommunityProvider, useCommunity } from './context/CommunityContext';
 
 type TabType = 'etappes' | 'teambuilder' | 'beheer' | 'community';
+type TeamTab = 'team' | 'opstelling' | 'scores';
+
+const TEAM_TABS = [
+  { id: 'team',       label: 'Team',       icon: '🏃' },
+  { id: 'opstelling', label: 'Opstelling', icon: '📋' },
+  { id: 'scores',     label: 'Scores',     icon: '📊' },
+];
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState<TabType>('teambuilder');
+  const [teamTab, setTeamTab] = useState<TeamTab>('team');
   const { currentUser } = useCommunity();
 
   // Handle community link on mount
@@ -99,6 +107,26 @@ function AppContent() {
                 </button>
               </div>
             </div>
+
+            {/* Desktop team sub-nav — only visible on lg+ when teambuilder is active */}
+            {activeTab === 'teambuilder' && (
+              <div className="hidden lg:flex border-t border-neutral-800/50">
+                {TEAM_TABS.map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setTeamTab(tab.id as TeamTab)}
+                    className={`flex items-center gap-2 px-8 py-3 text-xs font-black uppercase tracking-widest transition-all border-b-2 ${
+                      teamTab === tab.id
+                        ? 'border-amber-500 text-amber-400 bg-amber-500/5'
+                        : 'border-transparent text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800/30'
+                    }`}
+                  >
+                    <span>{tab.icon}</span>
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </nav>
       )}
@@ -111,7 +139,7 @@ function AppContent() {
           ) : activeTab === 'etappes' ? (
             <StageList ronde={giro2026} />
           ) : activeTab === 'teambuilder' ? (
-            <TeamMatrix stages={giro2026.etappes} />
+            <TeamSection stages={giro2026.etappes} activeTab={teamTab} onTabChange={setTeamTab} />
           ) : (
             <AdminDashboard />
           )}
