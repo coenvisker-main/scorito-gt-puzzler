@@ -2,140 +2,202 @@
 
 ---
 
-## Sprint 0 → Sprint 1
+## Sprint 1 → Sprint 2
 
 **Datum:** 2026-05-12  
-**Branch:** `main` (commit `4c15ef2`)  
-**Volgende sprint:** Sprint 1 — Etapperesultaten importeren
+**Branch:** `main` (commit `8b5fb46`)  
+**Volgende sprint:** Sprint 2 — Scoringsberekening
 
 ---
 
-## Wat er WEL gedaan is in Sprint 0
+## Wat er WEL gedaan is in Sprint 1
 
-### Fase 1 — Library Verificatie (het harde criterium)
+### Etapperesultaten importpipeline (US-2.1 t/m 2.4)
 
-De `procyclingstats` pip-library (v0.2.7) is getest tegen **live PCS-data** van de Giro 2026 zonder ook maar één regel applicatiecode aan te raken.
+**Nieuw bestand:** `scripts/import_stage_results.py`  
+CLI-script dat via `procyclingstats` per etappe ophaalt en naar Supabase schrijft:
+- `stage_results`: top 20 finishers + alle DNF/DNS/OTL
+- `stage_gc`, `stage_points_classification`, `stage_kom_classification`, `stage_youth_classification`: top 5 per klassement
+- `stage_ttt_results`: top 8 ploegen bij TTT-etappes
+- Idempotent via delete-then-insert (geen duplicaten bij herdraaien)
+- Onbekende riders overgeslagen met warning in stdout
 
-| Test | Resultaat |
-|---|---|
-| Startlijst (`RaceStartlist`) | ✅ 184 renners, alle velden aanwezig |
-| Etappeoverzicht (`Race.stages()`) | ✅ 21 etappes + terreintype-mapping |
-| Etapperesultaten (`Stage.results()`) | ✅ Etappes 1, 2, 3 getest |
-| GC/punten/berg/jong klassementen | ✅ Alle 4 methoden werken |
-| DNF/DNS herkenning | ✅ `status="DNF"`, `rank=None` |
-| Renner-specialisaties (`Rider`) | ✅ Na URL-correctie (zie bevindingen) |
-| Rate limiting (1s interval) | ✅ Geen HTTP 429 |
-| **Blockers** | **Geen — GO voor Sprint 1** |
-
-Bevindingen gedocumenteerd in `scripts/LIBRARY_TEST_RESULTS.md`.
-
-### Fase 2 — Supabase Schema & Seed
-
-**Schema:**  
-8 nieuwe tabellen aangemaakt via migratie (`sprint0_race_data_schema`):
-- `race_editions` — ronde-edities
-- `riders` — renners (PCS slug als primary key)
-- `stages` — etappes
-- `stage_results` — etappe-uitslag per renner
-- `stage_gc` — GC-klassement per etappe
-- `stage_points_classification` — puntenklassement per etappe
-- `stage_kom_classification` — bergklassement per etappe
-- `stage_youth_classification` — jongerenklassement per etappe
-- `stage_ttt_results` — TTT-ploegresultaten
-
-**Seed:**
-- 1 race_edition: Giro d'Italia 2026 (`race_edition_id: dfaabe0c-d838-4942-96dd-0071fce726b7`)
-- 182 renners geladen vanuit `riders.json`
-- 21 etappes geladen vanuit `stages.json`
-
-**Bestanden aangemaakt (allemaal gecommit op main):**
+**Gebruik:**
 ```
-scripts/requirements-python.txt    — Python package dependencies
-scripts/test_pcs_library.py        — verificatiescript (herbruikbaar)
-scripts/LIBRARY_TEST_RESULTS.md    — veldmapping en bevindingen
-scripts/seed_supabase.py           — seed-script (idempotent)
-scripts/.env.example               — template voor credentials
+python scripts/import_stage_results.py 4     # één etappe
+python scripts/import_stage_results.py all   # alle gereden etappes (stopt bij eerste niet-gereden)
 ```
+
+**`frontend/server.js`** — nieuw endpoint:
+```
+POST /api/import-stage/:nummer    (nummer = 1-21 of "all", timeout 5 min)
+```
+
+**`frontend/src/components/AdminDashboard.tsx`** — nieuwe sectie "Etappe Resultaten":
+- 21 stage-buttons (groen = al geïmporteerd, geladen via Supabase bij mount)
+- Bulk-knop "Importeer alle gereden etappes"
+- Output-log toont Python stdout na import
+
+**Startlijst bijgewerkt:** 184 rijders (was 182). Toegevoegd:
+- MIHKELS Madis — EF Education - EasyPost — €1.000.000 — jongere
+- STANNARD Robert — Bahrain - Victorious — €500.000
 
 ---
 
-## Wat er NIET gedaan is in Sprint 0
+## Huidige staat van de database (na inhaalimport)
+
+**Supabase project:** `tegssdqwvzpmlwzhtfiw` (eu-central-1)  
+**race_edition_id:** `dfaabe0c-d838-4942-96dd-0071fce726b7`
+
+### stage_results
+
+| Etappe | Finishers (top 20) | Uitvallers | Status |
+|--------|--------------------|------------|--------|
+| 1 | 20 | 0 | ✅ Compleet |
+| 2 | 20 | 5 | ✅ Compleet |
+| 3 | 20 | 2 | ✅ Compleet |
+| 4 | 0 | 1 | ⚠️ Onvolledig — gereden 2026-05-12, PCS nog niet bijgewerkt |
+
+### Klassementen (stage_gc / stage_points / stage_kom / stage_youth)
+
+| Etappe | GC | Punten | Berg | Jongeren |
+|--------|----|--------|------|---------|
+| 1 | 5 | 5 | 4* | 5 |
+| 2 | 5 | 5 | 5 | 5 |
+| 3 | 5 | 5 | 5 | 5 |
+| 4 | — | — | — | — |
+
+*KOM etappe 1 heeft 4 rijen: PCS had slechts 4 geklasseerde klimsers na etappe 1 (correct).
+
+---
+
+## Wat er NIET gedaan is in Sprint 1
 
 | Niet gedaan | Reden / Geplande sprint |
 |---|---|
-| Bestaande `import_riders.py` en `import_stages.py` vervangen | Bewust uitgesteld: zie advies onder |
-| Rider-specialisatiescores inladen (pcs_gc, pcs_tt, etc.) | Sprint 4 (US-1.3) |
-| Frontend-code gewijzigd | Was expliciet buiten scope |
-| `server.js` gewijzigd | Was expliciet buiten scope |
-| Stage-resultaten geïmporteerd | Sprint 1 (nu) |
-| TTT-etappe getest | Geen TTT-etappe gereden in Giro 2026 tot nu toe |
-| RLS-beleid ingesteld op nieuwe tabellen | Bewust uitgesteld; de app is privé en auth bestaat nog niet |
+| Etappe 4 volledig importeren | Gereden op 2026-05-12, PCS-uitslag nog niet beschikbaar |
+| `import_riders.py` vervangen door procyclingstats | Bewust uitgesteld na Sprint 2 (zie Sprint 0 handoff) |
+| Score-berekening | Sprint 2 (nu) |
+| Score-weergave in UI | Sprint 2 (nu) |
+| Rider-specialisatiescores (pcs_gc etc.) | Sprint 4 (US-1.3) |
+| RLS-beleid op Supabase-tabellen | Uitgesteld tot vóór publieke release |
 
 ---
 
-## Kritieke bevindingen voor Sprint 1
+## Open acties vóór Sprint 2 start
 
-Moet je weten voordat je begint:
+1. **Etappe 4 herimporten** zodra PCS de uitslag publiceert (vanavond/morgen):
+   ```
+   python scripts/import_stage_results.py 4
+   ```
+   Of via de Admin UI knop "Importeer etappe 4".
 
-### 1. Rider URL-prefix: `rider/` NIET `cyclist/`
-```python
-r = Rider("rider/tadej-pogacar")   # ✅ correct
-r = Rider("cyclist/tadej-pogacar") # ❌ geeft "HTML invalid" fout
+2. **Dagelijks importeren** tijdens de Giro: na elke etappe de knop drukken of het script draaien.
+
+---
+
+## Kritieke bevindingen voor Sprint 2
+
+### 1. Scorito puntentabel (volledig, geverifieerd met gebruiker)
+
+**Dagelijks (alleen opgestelde 9 rijders scoren dagelijks):**
+
+| Situatie | Punten |
+|---|---|
+| Etappe-uitslag top 20 | 50/44/40/36/32/30/28/26/24/22, daarna -2 per positie t/m 20e (2 pt) |
+| Kopman-bonus (K) | Etappepunten ×2 — ALLEEN etappe-uitslag, NIET klassement of teampunten |
+| GC dagelijks top 5 | 10/8/6/4/2 |
+| Puntenklassement top 5 | 8/6/4/2/1 |
+| Bergklassement top 5 | 8/6/4/2/1 |
+| Jongerenklassement top 5 | 6/4/3/2/1 |
+| Teampunten dagelijks | Etappewinst=10, GC-leider=8, Puntenleider=6, KOM-leider=6, Jongerenleider=3 |
+| Teampunten: alleen hoogste trui | Geel > Groen > Bolletjes > Wit (niet cumulatief) |
+
+**DNF/DNS-regels:**
+- **DNF** (uitgevallen tijdens etappe): scoort nog teampunten in die etappe, GEEN verdere punten daarna
+- **DNS** (niet van start): scoort NIETS in die etappe
+
+**Eindklassement (alle 20 teamleden tellen mee):**
+
+| Klassement | Punten |
+|---|---|
+| GC top 20 | 100/80/60/50/40/36/32/28/24/22, daarna -2 t/m 20e (2 pt) |
+| Puntenklassement top 10 | 80/60/40/30/20/16/12/8/4/2 |
+| Bergklassement top 10 | 80/60/40/30/20/16/12/8/4/2 |
+| Jongerenklassement top 5 | 60/40/30/20/10 |
+| Eindklassement teampunten | GC-winnaar=24, Puntenleider=18, KOM-leider=18, Jongerenleider=9 |
+
+**TTT:**
+- Top 8 ploegen: 40/32/28/24/20/16/12/8
+- Geen kopman-bonus, geen teampunten
+
+### 2. Database-kolommen voor scoringslogica
+
+`stage_results`:
 ```
-
-### 2. `Race.stages()` geeft geen afstand/start/finish
-`Race(url).stages()` retourneert alleen `stage_name`, `stage_url`, `profile_icon`, `date`.  
-Voor distance, departure, arrival, vertical_meters: gebruik `Stage(url)`.
-
-```python
-s = Stage("race/giro-d-italia/2026/stage-1")
-s.distance()        # → 147.0
-s.departure()       # → "Nessebar"
-s.arrival()         # → "Burgas"
-s.stage_type()      # → "RR" | "ITT" | "TTT"
+stage_number (int), rank (int|null), rider_id (text), rider_naam (text),
+tijd_gap (text), status (text: 'DF'|'DNF'|'DNS'|'OTL')
 ```
+Let op: `status = 'DF'` is een finisher (niet `'finisher'` — dat is alleen de DB-default die we nooit gebruiken).
 
-### 3. Niet-gereden etappe gooit exception
-```python
-Stage("race/giro-d-italia/2026/stage-4").results()
-# → raises: "Results table not in page HTML"
-# Altijd wrappen in try/except
+Klassement-tabellen (stage_gc / stage_points_classification / stage_kom_classification / stage_youth_classification):
 ```
-
-### 4. DNF/DNS rijders hebben rank=None
-```python
-# Finisher:   {'rank': 5,    'status': 'DF',  ...}
-# DNF rijder: {'rank': None, 'status': 'DNF', ...}
-# DNS rijder: {'rank': None, 'status': 'DNS', ...}
+stage_number (int), rank (int), rider_id (text|null), rider_naam (text)
 ```
+Rank 1 = jersey-drager die dag → geeft teampunten aan ploeggenoten.
 
-### 5. Klassementen geven ALLE gerankten terug (niet alleen top 5)
-`Stage.gc()`, `.points()`, `.kom()`, `.youth()` retourneren het volledige klassement.  
-Wij moeten zelf slicen: `gc[:5]`, `points[:5]`, `kom[:5]`, `youth[:4]`.
+### 3. Teampunten-logica: jersey-drager vs. ploeggenoot
 
-### 6. Team-naam bevat suffix
-`team_name` heeft `(WT)` of `(PRT)` suffix. Strip bij opslag:
-```python
-team_naam.replace(" (WT)", "").replace(" (PRT)", "")
+Teampunten gelden voor rijders in je opstelling die in dezelfde **ploeg** zitten als de jersey-drager.
+- Jersey-drager zelf scoort geen aparte teampunten (alleen als hij in je opstelling staat via GC/punten/klassementbonus)
+- Meerdere riders van dezelfde ploeg in je opstelling → allemaal teampunten
+- Alleen de hoogste trui telt: als één rijder tegelijk leidt in GC én punten, tellen alleen de GC-teampunten (8), niet ook de punten-teampunten (6)
+
+### 4. 192 rijders in Supabase, 184 in riders.json
+
+8 "ghost riders" uit een eerdere testsessie. Niet verwijderd (upsert verwijdert niet). Ze verschijnen nooit in `stage_results` want ze rijden niet. Geen actie nodig voor Sprint 2.
+
+### 5. Rijders zonder rider_id in klassementen
+
+Madis Mihkels staat in sommige klassementen met `rider_id = null` (etappe 1, vóór hij aan de riders-tabel werd toegevoegd). Na de herdraaien van de import staan alle etappes correct met zijn rider_id. Check na etappe 4 herimporten.
+
+---
+
+## Sprint 2 — Startpunt
+
+Wat Sprint 2 gaat bouwen:
+
+### Primair: score-berekening per etappe
+
+**Optie A — Python script** `scripts/calculate_scores.py`:
+- Leest `stage_results` + klassementen uit Supabase
+- Berekent per (rijder, etappe) de dagelijkse Scorito-punten
+- Slaat op in nieuwe tabel `stage_scores` (rider_id, stage_number, punten_etappe, punten_gc, punten_punten, punten_kom, punten_jong, punten_team, punten_totaal)
+
+**Optie B — Berekening in de frontend** (TypeScript):
+- Haalt ruwe data op uit Supabase
+- Berekent scores client-side op basis van de opgestelde opstelling in TeamContext
+- Geen extra DB-tabel nodig
+
+Aanbeveling: **Optie A** voor de algemene scores (wie scoort hoeveel los van een specifiek team), **Optie B** voor gepersonaliseerde team-scores (jouw opgestelde 9 rijders per etappe × jouw kopmannen).
+
+### Secondair: score-weergave in UI
+
+- In de TeamMatrix: kolom per etappe met behaalde punten per rijder
+- Totaalstand onder het teamoverzicht
+- Vergelijking verwacht (formula) vs. werkelijk (stage_results)
+
+---
+
+## Bestandsoverzicht Sprint 1
+
 ```
-
-### 7. Etappe 4 is vandaag (12 mei)
-Resultaten beschikbaar vanavond/morgen. Etappes 1-3 zijn al inhaalbaar bij sprint-start.
-
-### 8. race_edition_id voor alle DB-schrijfacties
-```
-race_edition_id = dfaabe0c-d838-4942-96dd-0071fce726b7
-```
-Alle nieuwe tabellen (stage_results, stage_gc, etc.) verwijzen hier naar.  
-Haal het dynamisch op met:
-```python
-result = client.table("race_editions")
-    .select("id")
-    .eq("race_slug", "giro-d-italia")
-    .eq("jaar", 2026)
-    .single()
-    .execute()
-race_edition_id = result.data["id"]
+scripts/import_stage_results.py    — nieuw: PCS → Supabase import per etappe
+scripts/.env                        — credentials (gitignored, aanmaken via .env.example)
+frontend/server.js                  — POST /api/import-stage/:nummer endpoint toegevoegd
+frontend/src/components/
+  AdminDashboard.tsx                — "Etappe Resultaten" sectie toegevoegd
+frontend/src/data/riders.json       — bijgewerkt: 184 rijders incl. Mihkels + Stannard
 ```
 
 ---
@@ -144,47 +206,7 @@ race_edition_id = result.data["id"]
 
 Project: `tegssdqwvzpmlwzhtfiw` (eu-central-1, ACTIVE_HEALTHY)  
 URL: `https://tegssdqwvzpmlwzhtfiw.supabase.co`  
-Sleutel: Gebruik de anon key uit de Supabase dashboard of vraag aan de beheerder.  
-Maak een `scripts/.env` bestand aan (zie `scripts/.env.example`).
-
----
-
-## Advies: wanneer bestaande scrapers vervangen?
-
-De migratie van `import_riders.py` en `import_stages.py` naar de `procyclingstats`-library staat op de backlog als US-1.1 en US-1.2. Aanbeveling: **doe dit direct na Sprint 2**, niet later.
-
-**Waarom na Sprint 2:**
-- Na Sprint 1 schrijven de nieuwe importscripts naar Supabase
-- De oude scrapers schrijven nog steeds naar `riders.json`
-- Dit geeft twee losse datastores die uit sync kunnen lopen halverwege de Giro
-- De veldmapping is al volledig gedocumenteerd in `LIBRARY_TEST_RESULTS.md`
-
-**Niet eerder dan Sprint 2:**
-- Sprints 1 en 2 zijn urgent (Giro loopt), geen tijd voor migratie
-- De seed-data is al correct in Supabase, de oude scrapers worden niet meer actief gebruikt
-
----
-
-## Sprint 1 — Startpunt
-
-Wat Sprint 1 gaat bouwen (US-2.1 t/m 2.4):
-
-1. **Python importscript** `scripts/import_stage_results.py`:
-   - Haalt per etappe: results, gc, points, kom, youth op via `Stage(url)`
-   - Schrijft naar Supabase: `stage_results`, `stage_gc`, `stage_points_classification`, `stage_kom_classification`, `stage_youth_classification`
-   - Idempotent (upsert, geen duplicaten)
-   - Vangt exception op bij niet-gereden etappes
-
-2. **Admin API-endpoint** in `server.js`:
-   - `POST /api/import-stage/:nummer` — triggert het importscript voor etappe N
-   
-3. **Admin UI knop** in `AdminDashboard.tsx`:
-   - "Importeer etappe [X] resultaten"
-   - Toont status/output
-
-4. **Inhaalimport** voor etappes 1-4 die al gereden zijn bij sprint-start
-
-**Branch:** Ga verder op `main`. Geen feature branch nodig voor kleine groep.
+Credentials: `scripts/.env` (aanmaken via `scripts/.env.example`)
 
 ---
 
