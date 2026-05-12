@@ -11,6 +11,8 @@ export function CommunityDashboard() {
     const [userName, setUserName] = useState('');
     const [joinGroupId, setJoinGroupId] = useState<string | null>(null);
     const [copied, setCopied] = useState(false);
+    const [joinMode, setJoinMode] = useState<'create' | 'manual'>('create');
+    const [manualGroupId, setManualGroupId] = useState('');
     const [expensivePage, setExpensivePage] = useState(0);
     const [gemPage, setGemPage] = useState(0);
     const [gemSearch, setGemSearch] = useState('');
@@ -79,6 +81,21 @@ export function CommunityDashboard() {
         await joinGroup(joinGroupId, userName);
     };
 
+    const handleManualJoin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        let groupId = manualGroupId.trim();
+        // Accept full invite URL in addition to bare group ID
+        try {
+            const url = new URL(groupId);
+            const param = url.searchParams.get('group');
+            if (param) groupId = param;
+        } catch {
+            // Not a URL — use as-is
+        }
+        if (!groupId || !userName) return;
+        await joinGroup(groupId, userName);
+    };
+
     const handleCopyLink = () => {
         const url = new URL(window.location.href);
         if (currentGroup) {
@@ -144,14 +161,15 @@ export function CommunityDashboard() {
                     <div className="space-y-6">
                         <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-center">
                             <p className="text-amber-500 text-sm font-bold">Je bent uitgenodigd voor een groep!</p>
+                            <p className="text-neutral-400 text-xs mt-1">Heb je al eerder meegedaan? Vul dezelfde naam in om je team terug te zien.</p>
                         </div>
                         <form onSubmit={handleJoinGroup} className="space-y-4">
                             <div>
                                 <label className="block text-xs font-bold text-neutral-500 uppercase mb-1">Jouw Naam</label>
-                                <input 
-                                    type="text" 
-                                    value={userName} 
-                                    onChange={e => setUserName(e.target.value)} 
+                                <input
+                                    type="text"
+                                    value={userName}
+                                    onChange={e => setUserName(e.target.value)}
                                     className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:border-amber-500 focus:outline-none text-lg font-bold"
                                     placeholder="bijv. Mathieu"
                                     required
@@ -163,34 +181,87 @@ export function CommunityDashboard() {
                             </button>
                         </form>
                     </div>
+                ) : joinMode === 'manual' ? (
+                    <div className="space-y-6">
+                        <div className="bg-neutral-800/50 border border-neutral-700 rounded-xl p-4 text-center">
+                            <p className="text-white text-sm font-bold">Toegang op dit apparaat</p>
+                            <p className="text-neutral-400 text-xs mt-1">Vul de groepscode en je naam in om je ingediende team terug te zien.</p>
+                        </div>
+                        <form onSubmit={handleManualJoin} className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-neutral-500 uppercase mb-1">Groepscode</label>
+                                <input
+                                    type="text"
+                                    value={manualGroupId}
+                                    onChange={e => setManualGroupId(e.target.value)}
+                                    className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:border-amber-500 focus:outline-none font-mono text-sm"
+                                    placeholder="Plak hier de groepscode of invite-link"
+                                    required
+                                    autoFocus
+                                />
+                                <p className="text-[10px] text-neutral-600 mt-1">Je vindt de groepscode via de gedeelde uitnodigingslink van een groepslid.</p>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-neutral-500 uppercase mb-1">Jouw Naam</label>
+                                <input
+                                    type="text"
+                                    value={userName}
+                                    onChange={e => setUserName(e.target.value)}
+                                    className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:border-amber-500 focus:outline-none"
+                                    placeholder="bijv. Mathieu"
+                                    required
+                                />
+                            </div>
+                            <button type="submit" className="w-full bg-amber-500 hover:bg-amber-600 text-neutral-950 font-black uppercase tracking-wider py-3 rounded-xl transition-colors">
+                                Team Terugzien
+                            </button>
+                            <button type="button" onClick={() => setJoinMode('create')} className="w-full text-neutral-500 hover:text-neutral-300 text-sm py-2 transition-colors">
+                                ← Nieuwe groep aanmaken
+                            </button>
+                        </form>
+                    </div>
                 ) : (
-                    <form onSubmit={handleCreateGroup} className="space-y-4">
-                        <div>
-                            <label className="block text-xs font-bold text-neutral-500 uppercase mb-1">Naam Vriendengroep</label>
-                            <input 
-                                type="text" 
-                                value={groupName} 
-                                onChange={e => setGroupName(e.target.value)} 
-                                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:border-amber-500 focus:outline-none"
-                                placeholder="bijv. De Wielergekken"
-                                required
-                            />
+                    <div className="space-y-4">
+                        <form onSubmit={handleCreateGroup} className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-neutral-500 uppercase mb-1">Naam Vriendengroep</label>
+                                <input
+                                    type="text"
+                                    value={groupName}
+                                    onChange={e => setGroupName(e.target.value)}
+                                    className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:border-amber-500 focus:outline-none"
+                                    placeholder="bijv. De Wielergekken"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-neutral-500 uppercase mb-1">Jouw Naam</label>
+                                <input
+                                    type="text"
+                                    value={userName}
+                                    onChange={e => setUserName(e.target.value)}
+                                    className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:border-amber-500 focus:outline-none"
+                                    placeholder="bijv. Mathieu"
+                                    required
+                                />
+                            </div>
+                            <button type="submit" className="w-full bg-amber-500 hover:bg-amber-600 text-neutral-950 font-black uppercase tracking-wider py-3 rounded-xl transition-colors">
+                                Nieuwe Groep Aanmaken
+                            </button>
+                        </form>
+                        <div className="relative flex items-center">
+                            <div className="flex-grow border-t border-neutral-800" />
+                            <span className="mx-3 text-xs text-neutral-600 uppercase tracking-widest">of</span>
+                            <div className="flex-grow border-t border-neutral-800" />
                         </div>
-                        <div>
-                            <label className="block text-xs font-bold text-neutral-500 uppercase mb-1">Jouw Naam</label>
-                            <input 
-                                type="text" 
-                                value={userName} 
-                                onChange={e => setUserName(e.target.value)} 
-                                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:border-amber-500 focus:outline-none"
-                                placeholder="bijv. Mathieu"
-                                required
-                            />
-                        </div>
-                        <button type="submit" className="w-full bg-amber-500 hover:bg-amber-600 text-neutral-950 font-black uppercase tracking-wider py-3 rounded-xl transition-colors">
-                            Nieuwe Groep Aanmaken
+                        <button
+                            type="button"
+                            onClick={() => setJoinMode('manual')}
+                            className="w-full border border-neutral-700 hover:border-neutral-500 text-neutral-300 hover:text-white font-bold py-3 rounded-xl transition-colors text-sm"
+                        >
+                            Al lid? Groepscode invoeren →
                         </button>
-                    </form>
+                    </div>
                 )}
             </div>
         );
@@ -217,10 +288,11 @@ export function CommunityDashboard() {
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                     <button
                         onClick={handleCopyLink}
+                        title="Gebruik deze link om op een ander apparaat toegang te krijgen tot je team — vul dan dezelfde naam in."
                         className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white px-4 py-2 sm:py-2.5 rounded-xl text-sm font-bold transition-colors"
                     >
                         {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Link className="w-3.5 h-3.5" />}
-                        {copied ? 'Gekopieerd' : 'Deel Link'}
+                        {copied ? 'Gekopieerd' : 'Deel / Ander Apparaat'}
                     </button>
                     <button
                         onClick={leaveGroup}

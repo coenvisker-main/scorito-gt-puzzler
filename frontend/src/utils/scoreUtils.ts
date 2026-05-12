@@ -79,6 +79,7 @@ export function calculatePersonalizedScores(
   stageScores: Record<string, Record<number, StageBaseScore>>,
   jerseyHolders: Record<number, JerseyHolders>,
   stages: number[],
+  dnsRiders: Record<string, Set<number>> = {},
 ): PersonalizedScoreResult {
   const perSlot: PersonalizedScoreResult['perSlot'] = {};
   const perStage: PersonalizedScoreResult['perStage'] = {};
@@ -90,13 +91,15 @@ export function calculatePersonalizedScores(
     for (const stageNum of stages) {
       const lineupStatus = slot.lineup[stageNum] ?? '';
       const opgesteld = lineupStatus === 'X' || lineupStatus === 'K';
+      const isDns = dnsRiders[slot.riderId]?.has(stageNum) ?? false;
       const base = stageScores[slot.riderId]?.[stageNum] ?? NULL_SCORE;
       const jerseys = jerseyHolders[stageNum] ?? {};
 
-      const punten_kopman_bonus = opgesteld && lineupStatus === 'K' ? base.punten_etappe : 0;
-      const punten_team = opgesteld ? calcTeamPoints(slot.team, jerseys, slot.riderId) : 0;
+      // DNS: scoort helemaal niets (geen etappe-, klassements-, kopman- of teampunten)
+      const punten_kopman_bonus = opgesteld && !isDns && lineupStatus === 'K' ? base.punten_etappe : 0;
+      const punten_team = opgesteld && !isDns ? calcTeamPoints(slot.team, jerseys, slot.riderId) : 0;
 
-      const totaal = opgesteld
+      const totaal = opgesteld && !isDns
         ? base.punten_etappe + punten_kopman_bonus
           + base.punten_gc + base.punten_punten + base.punten_kom + base.punten_jong
           + punten_team

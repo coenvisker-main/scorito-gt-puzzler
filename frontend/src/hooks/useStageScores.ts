@@ -35,6 +35,11 @@ interface RawStageResult {
   rank: number | null;
 }
 
+interface RawDnsResult {
+  stage_number: number;
+  rider_id: string | null;
+}
+
 function setHolder(
   map: Record<number, JerseyHolders>,
   stageNum: number,
@@ -83,6 +88,7 @@ export function useStageScores(slots: TeamSlot[]): {
 } {
   const [rawScores, setRawScores] = useState<RawStageScore[]>([]);
   const [jerseyHolders, setJerseyHolders] = useState<Record<number, JerseyHolders>>({});
+  const [dnsRidersMap, setDnsRidersMap] = useState<Record<string, Set<number>>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -93,7 +99,7 @@ export function useStageScores(slots: TeamSlot[]): {
       setIsLoading(true);
       setError(null);
       try {
-        const [scoresRes, gcRes, ptsRes, komRes, jongRes, resultsRes] = await Promise.all([
+        const [scoresRes, gcRes, ptsRes, komRes, jongRes, resultsRes, dnsRes] = await Promise.all([
           supabase
             .from('stage_scores')
             .select('stage_number,rider_id,punten_etappe,punten_gc,punten_punten,punten_kom,punten_jong')
@@ -123,11 +129,16 @@ export function useStageScores(slots: TeamSlot[]): {
             .select('stage_number,rider_id,rank')
             .eq('race_edition_id', RACE_EDITION_ID)
             .eq('rank', 1),
+          supabase
+            .from('stage_results')
+            .select('stage_number,rider_id')
+            .eq('race_edition_id', RACE_EDITION_ID)
+            .eq('status', 'DNS'),
         ]);
 
         if (cancelled) return;
 
-        const err = [scoresRes, gcRes, ptsRes, komRes, jongRes, resultsRes]
+        const err = [scoresRes, gcRes, ptsRes, komRes, jongRes, resultsRes, dnsRes]
           .find(r => r.error)?.error;
         if (err) throw new Error(err.message);
 
@@ -139,6 +150,14 @@ export function useStageScores(slots: TeamSlot[]): {
           jongRes.data ?? [],
           resultsRes.data ?? [],
         ));
+
+        const dnsMap: Record<string, Set<number>> = {};
+        for (const row of (dnsRes.data ?? []) as RawDnsResult[]) {
+          if (!row.rider_id) continue;
+          if (!dnsMap[row.rider_id]) dnsMap[row.rider_id] = new Set();
+          dnsMap[row.rider_id].add(row.stage_number);
+        }
+        setDnsRidersMap(dnsMap);
       } catch (e: any) {
         if (!cancelled) setError(e.message ?? 'Onbekende fout');
       } finally {
@@ -177,8 +196,9 @@ export function useStageScores(slots: TeamSlot[]): {
       stageScoresMap,
       jerseyHolders,
       availableStages,
+      dnsRidersMap,
     );
-  }, [slots, stageScoresMap, jerseyHolders, availableStages]);
+  }, [slots, stageScoresMap, jerseyHolders, availableStages, dnsRidersMap]);
 
   return { scores, availableStages, isLoading, error };
 }

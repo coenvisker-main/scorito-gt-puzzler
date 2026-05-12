@@ -2,7 +2,152 @@
 
 ---
 
-## Sprint 2 → Sprint 3
+## Sprint 3 → Sprint 4
+
+**Datum:** 2026-05-12
+**Branch:** `main` (commit `7ec3f88`, gemerged vanuit `claude/inspiring-beaver-8b640e`)
+**Volgende sprint:** Sprint 4 — Mobiel herontwerp Team-tab (design-sprint met Claude Design)
+
+---
+
+### Wat er gedaan is in Sprint 3
+
+#### 1. DNS/OTL fix — scoreberekening
+
+**Probleem:** Een opgestelde renner met status `DNS` kreeg ten onrechte teampunten.
+
+**Spelregel (correct):**
+- `DNS` → scoort helemaal niets (ook geen teampunten)
+- `DNF` / `OTL` → scoort nog teampunten voor die etappe
+
+**Wat gewijzigd:**
+- `frontend/src/hooks/useStageScores.ts` — extra query op `stage_results` waar `status = 'DNS'`; bouwt `dnsRidersMap: Record<string, Set<number>>`; geeft dit door aan `calculatePersonalizedScores`
+- `frontend/src/utils/scoreUtils.ts` — `calculatePersonalizedScores` accepteert nu `dnsRiders` parameter (default `{}`); zerout kopman-bonus én teampunten voor DNS-rijders
+
+Status-waarden in de database zijn **uppercase**: `"DNS"`, `"DNF"`, `"OTL"`, `"DF"` (finisher default).
+
+#### 2. Multi-device team-toegang
+
+**Probleem:** Team was aan localStorage gebonden; op een nieuw apparaat was het niet terug te vinden zonder uitnodigingslink in de URL.
+
+**Wat gewijzigd (`frontend/src/components/CommunityDashboard.tsx`):**
+- Nieuw formulier "Al lid? Groepscode invoeren →" onder het aanmaakformulier
+- Accepteert zowel bare UUID als volledige uitnodigingslink (URL-parsing)
+- "Deel / Ander Apparaat" knop met tooltip die uitlegt dat de link ook voor ander apparaat werkt
+- Nadat de gebruiker inlogt met naam + groepscode: het eerder ingediende team verschijnt automatisch via de bestaande `mySubmittedTeam` banner
+
+**Architectuurkeuze:** geen Supabase Auth — de bestaande `group_id + user_name` sleutel in `submitted_teams` is voldoende voor de kleine vriendengroep.
+
+---
+
+### Huidige staat na Sprint 3
+
+**Supabase project:** `tegssdqwvzpmlwzhtfiw` (eu-central-1, ACTIVE_HEALTHY)
+**race_edition_id:** `dfaabe0c-d838-4942-96dd-0071fce726b7`
+
+| Etappe | stage_results | stage_scores | Status |
+|--------|--------------|--------------|--------|
+| 1–3 | ✅ Compleet | ✅ Berekend + geverifieerd | OK |
+| 4 | ⚠️ Onvolledig | ❌ Nog niet | Herimporten zodra PCS beschikbaar |
+| 5–21 | ❌ Niet beschikbaar | ❌ Niet beschikbaar | Wachten op etappes |
+
+**Dagelijkse workflow (geen code nodig):**
+```
+1. python scripts/import_stage_results.py N    (of Admin UI)
+2. python scripts/calculate_scores.py N        (of Admin UI)
+3. Verificeer in TeamMatrix → Scores-modus
+```
+
+---
+
+### Sprint 4 — Mobiel herontwerp Team-tab
+
+#### Doel
+De huidige Team-tab combineert teambuilding, dagelijkse opstelling (X/K), budget en scores op één scherm. Op mobiel geeft dit te veel rommel en te veel scroll. De sprint maakt een ontwerp dat de functies splitst.
+
+#### Start met Claude Design (MCP)
+
+**De volgende sessie opent met Claude Design** voor het genereren van wireframes/mockups.
+
+Gebruik het MCP-tool `generate-design` of `generate-design-structured` met de volgende context:
+
+**Context voor het design-prompt:**
+- App: fantasy cycling tool, dark theme (Tailwind: `neutral-950` achtergrond, `amber-500` accent)
+- Huidige component: `TeamMatrix.tsx` — één grote tabel die combineert: 20 renners beheren, X/K-opstelling per etappe klikken, scores bekijken, budget tracker
+- Huidige mobiele view: `MobileTeamView.tsx` — kaartjes per renner met horizontal scroll voor etappes
+- Pijnpunten: te veel op één scherm, geen duidelijk score-overzicht, eindeloos scrollen
+
+**Gewenste structuur (ter discussie in design):**
+
+| Sub-tab | Inhoud | Gebruik |
+|---|---|---|
+| **Team** 🏃 | 20 renners invullen + budget | Eenmalig |
+| **Opstelling** 📋 | X/K per etappe instellen | Dagelijks |
+| **Scores** 📊 | Score-overzicht per etappe | Volgend |
+
+**Betrokken bestanden voor implementatie (later):**
+- `frontend/src/components/TeamMatrix.tsx` — bevat nu alle logica (opsplitsen)
+- `frontend/src/components/MobileTeamView.tsx` — vervangen of uitbreiden
+- `frontend/src/App.tsx` — tab `'teambuilder'` is het ingangspunt
+- `frontend/src/context/TeamContext.tsx` — state voor slots/lineup/budget
+
+**Deliverable Sprint 4:** design + componentenstructuur, géén implementatie. Volgende sprint is de implementatie.
+
+---
+
+### Roadmap — Overig openstaand werk
+
+#### Hoge prioriteit (Giro 2026, nog lopend)
+
+| Item | US | Wanneer |
+|---|---|---|
+| Eindklassement score-berekening | US-3.2 | Na etappe 21 |
+| Scorebord vriendengroep | US-3.3 | Na etappe 21 |
+| "Alleen hoogste trui" herverificatie | — | Zodra relevante etappe gespeeld |
+
+**Eindklassement aanpak (te bepalen):** aparte `final_scores` tabel of `stage_number = 0` in `stage_scores`. Telt voor alle 20 teamleden (niet alleen dagopstelling). Puntentabel:
+- GC top 20: `[100,80,60,50,40,36,32,28,24,22,20,18,16,14,12,10,8,6,4,2]`
+- Punten top 10: `[80,60,40,30,20,16,12,8,4,2]`
+- Berg top 10: `[80,60,40,30,20,16,12,8,4,2]`
+- Jong top 5: `[60,40,30,20,10]`
+- Eindteampunten: GC-winnaar=24, Punten=18, KOM=18, Jong=9
+
+#### Middelhoge prioriteit (vóór Tour de France 2026)
+
+| Item | US | Toelichting |
+|---|---|---|
+| Scraper → `procyclingstats` | US-1.1, 1.2 | `import_riders.py` + `import_stages.py` refactoren; library al geverifieerd in Sprint 0 |
+| Multi-ronde configuratie | US-1.4 | Race-URL configureerbaar (niet hardcoded Giro 2026) |
+| PCS-specialisatiescores | US-1.3 | `Rider(url).points_per_speciality()` voor alle renners; velden al in schema |
+
+#### Lagere prioriteit (na de ronde)
+
+| Item | Toelichting |
+|---|---|
+| Optimale team-analyse (US-5.1, 5.2) | Beste 9+kopman per etappe, beste team van 20 binnen budget |
+| Renner-vergelijker (US-6.1–6.3) | PCS-scores als radarchart, side-by-side vergelijker |
+| Historisch archief (US-7.1, 7.2) | Team + scores per ronde-editie bewaren |
+
+#### Technische schuld / backlog
+
+- **RLS uitschakelen**: `groups` en `votes` tabellen hebben geen Row Level Security (was al een bekende openstaande punt in Sprint 0)
+- **Dagelijkse opstelling syncen** (US-4.1 uitbreiding): de X/K-opstelling staat nu alleen in localStorage; zodra multi-device authopslag uitgebreid wordt kan dit ook gesynct worden
+
+---
+
+### Bestandsoverzicht Sprint 3
+
+```
+frontend/src/hooks/useStageScores.ts     — DNS riderStatusMap + dnsRidersMap state
+frontend/src/utils/scoreUtils.ts          — dnsRiders parameter + DNS-check in scoring
+frontend/src/components/
+  CommunityDashboard.tsx                  — manual join form, URL-parsing, knoplabel
+```
+
+---
+
+<details>
+<summary>Sprint 2 → Sprint 3 (ingeklapt)</summary>
 
 **Datum:** 2026-05-12
 **Branch:** `main` (commit `d535385`)
@@ -209,4 +354,8 @@ Credentials: `scripts/.env` (aanmaken via `scripts/.env.example`)
 
 ---
 
-*Handoff opgesteld: 2026-05-12*
+</details>
+
+---
+
+*Laatste update: 2026-05-12 (Sprint 3 → Sprint 4)*
