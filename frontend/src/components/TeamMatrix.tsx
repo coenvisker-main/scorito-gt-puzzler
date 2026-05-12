@@ -8,6 +8,8 @@ import { StartlistModal } from './StartlistModal';
 import { MobileTeamView } from './MobileTeamView';
 import { DistributionSummary } from './DistributionSummary';
 import { riders as allRiders } from '../data/riders';
+import { useStageScores } from '../hooks/useStageScores';
+import { calcRiderTotal, calcBaseTotal } from '../utils/scoreUtils';
 import {
   Trash2,
   Crown,
@@ -19,7 +21,8 @@ import {
   CheckCircle2,
   XCircle,
   Send,
-  RefreshCw
+  RefreshCw,
+  BarChart2
 } from 'lucide-react';
 
 
@@ -61,6 +64,9 @@ export function TeamMatrix({ stages }: TeamMatrixProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [confirmReset, setConfirmReset] = useState(false);
     const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+    const [viewMode, setViewMode] = useState<'opstelling' | 'scores'>('opstelling');
+
+    const { scores, availableStages, isLoading: scoresLoading } = useStageScores(slots);
 
     const isOverBudget = budgetUsed > maxBudget;
     const activeRidersCount = slots.filter(s => s.name.trim() !== '').length;
@@ -241,6 +247,45 @@ export function TeamMatrix({ stages }: TeamMatrixProps) {
         />
       </div>
 
+      {/* View mode toggle */}
+      <div className="hidden lg:flex items-center justify-between gap-3">
+        <div className="flex items-center gap-1 bg-neutral-900 border border-neutral-800 rounded-xl p-1">
+          <button
+            onClick={() => setViewMode('opstelling')}
+            className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+              viewMode === 'opstelling'
+                ? 'bg-neutral-700 text-white shadow'
+                : 'text-neutral-500 hover:text-neutral-300'
+            }`}
+          >
+            <Crown className="w-3 h-3" />
+            Opstelling
+          </button>
+          <button
+            onClick={() => setViewMode('scores')}
+            className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+              viewMode === 'scores'
+                ? 'bg-emerald-600 text-white shadow'
+                : 'text-neutral-500 hover:text-neutral-300'
+            }`}
+          >
+            <BarChart2 className="w-3 h-3" />
+            Scores
+            {scoresLoading && <RefreshCw className="w-2.5 h-2.5 animate-spin" />}
+            {!scoresLoading && availableStages.length > 0 && (
+              <span className="text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded px-1">
+                E{availableStages.length}
+              </span>
+            )}
+          </button>
+        </div>
+        {viewMode === 'scores' && !scoresLoading && availableStages.length === 0 && (
+          <p className="text-[11px] text-neutral-500 font-bold">
+            Geen scores beschikbaar — bereken eerst via Admin → Score Berekeningen.
+          </p>
+        )}
+      </div>
+
       {/* DESKTOP TABLE VIEW */}
       <div className="hidden lg:block bg-neutral-900 rounded-xl border border-neutral-800 shadow-2xl relative overflow-hidden">
         <div className="overflow-x-auto overflow-y-visible">
@@ -263,16 +308,23 @@ export function TeamMatrix({ stages }: TeamMatrixProps) {
                 {stages.map(s => (
                   <th key={s.nummer} className="p-0.5 w-8 text-center border-r border-neutral-800/50" title={`${s.startplaats} -> ${s.finishplaats}`}>
                     <div className="flex flex-col items-center">
-                        <span className="text-[8px] text-neutral-400 font-black uppercase leading-none">{s.nummer}</span>
+                        <span className={`text-[8px] font-black uppercase leading-none ${
+                          viewMode === 'scores' && availableStages.includes(s.nummer)
+                            ? 'text-emerald-400'
+                            : 'text-neutral-400'
+                        }`}>{s.nummer}</span>
                         <div className={`w-1 h-1 mt-0.5 rounded-full ${
                             s.terreintype === 'bergen' ? 'bg-red-500 shadow-[0_0_5px_rgba(239,68,68,0.5)]' :
                             s.terreintype === 'heuvels' ? 'bg-amber-500 shadow-[0_0_5px_rgba(245,158,11,0.5)]' :
-                            s.terreintype === 'tijdrit' ? 'bg-purple-500 shadow-[0_0_5px_rgba(168,85,247,0.5)]' : 
+                            s.terreintype === 'tijdrit' ? 'bg-purple-500 shadow-[0_0_5px_rgba(168,85,247,0.5)]' :
                             'bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]'
                         }`}></div>
                     </div>
                   </th>
                 ))}
+                {viewMode === 'scores' && (
+                  <th className="p-1 w-12 text-center text-emerald-500 text-[9px] font-black uppercase tracking-widest">Tot.</th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-800/30">
@@ -353,6 +405,50 @@ export function TeamMatrix({ stages }: TeamMatrixProps) {
                     </td>
                     
                     {stages.map(s => {
+                      if (viewMode === 'scores') {
+                        const slotScore = scores?.perSlot[slot.id]?.[s.nummer];
+                        const base = slotScore ? calcBaseTotal(slotScore) : 0;
+                        const showVal = slotScore?.opgesteld
+                          ? slotScore.totaal
+                          : base > 0 ? base : null;
+
+                        // Tooltip text
+                        const tipLines: string[] = [];
+                        if (slotScore && (slotScore.opgesteld || base > 0)) {
+                          tipLines.push(`Etappe: ${slotScore.punten_etappe} pt`);
+                          if (slotScore.punten_kopman_bonus > 0) tipLines.push(`  + ${slotScore.punten_kopman_bonus} kopman`);
+                          if (slotScore.punten_gc > 0)     tipLines.push(`GC:     ${slotScore.punten_gc} pt`);
+                          if (slotScore.punten_punten > 0) tipLines.push(`Punten: ${slotScore.punten_punten} pt`);
+                          if (slotScore.punten_kom > 0)    tipLines.push(`Berg:   ${slotScore.punten_kom} pt`);
+                          if (slotScore.punten_jong > 0)   tipLines.push(`Jong:   ${slotScore.punten_jong} pt`);
+                          if (slotScore.punten_team > 0)   tipLines.push(`Team:   ${slotScore.punten_team} pt`);
+                          tipLines.push(`──────────────`);
+                          tipLines.push(`Totaal: ${slotScore.opgesteld ? slotScore.totaal : base} pt${!slotScore.opgesteld ? ' (niet opgesteld)' : ''}`);
+                        }
+
+                        let cellCls = 'text-neutral-800';
+                        if (slotScore?.opgesteld) {
+                          if (slotScore.totaal >= 51)     cellCls = 'bg-emerald-500/25 text-emerald-200 font-black';
+                          else if (slotScore.totaal >= 21) cellCls = 'bg-emerald-500/15 text-emerald-300 font-bold';
+                          else if (slotScore.totaal >= 1)  cellCls = 'bg-emerald-500/10 text-emerald-400 font-bold';
+                          else                             cellCls = 'text-neutral-600';
+                        } else if (base > 0) {
+                          cellCls = 'text-neutral-600 italic';
+                        }
+
+                        return (
+                          <td key={s.nummer} className="p-0.5 w-8 text-center border-r border-neutral-800/10">
+                            <div
+                              title={tipLines.join('\n')}
+                              className={`w-7 h-5 mx-auto rounded-sm flex items-center justify-center text-[10px] transition-colors ${cellCls}`}
+                            >
+                              {showVal ?? ''}
+                            </div>
+                          </td>
+                        );
+                      }
+
+                      // Opstelling mode (default)
                       const status = slot.lineup[s.nummer] || '';
                       let cellClass = "bg-transparent text-transparent";
                       if (status === 'X') cellClass = "bg-blue-500/30 text-blue-100 border-blue-500/40 shadow-[inset_0_0_10px_rgba(59,130,246,0.1)]";
@@ -372,32 +468,89 @@ export function TeamMatrix({ stages }: TeamMatrixProps) {
                         </td>
                       );
                     })}
+                    {viewMode === 'scores' && (
+                      <td className="p-1 w-12 text-center border-l border-neutral-800/30">
+                        {scores && slot.riderId ? (() => {
+                          const total = calcRiderTotal(scores.perSlot[slot.id] ?? {});
+                          return total > 0 ? (
+                            <span className="text-[11px] font-black text-emerald-400">{total}</span>
+                          ) : null;
+                        })() : null}
+                      </td>
+                    )}
                   </tr>
                 );
               })}
             </tbody>
             <tfoot className="sticky bottom-0 z-40 bg-neutral-950 border-t-2 border-neutral-800">
-                <tr className="divide-x divide-neutral-900 text-neutral-400">
-                    <td className="sticky left-0 bg-neutral-950 z-50"></td>
-                    <td className="p-3 sticky left-7 bg-neutral-950 z-50 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 shadow-[4px_0_15px_rgba(0,0,0,0.5)]">
-                        <Trophy className="w-4 h-4 text-amber-500" /> TOTAAL OPSTELLING
-                    </td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    {stages.map(s => {
-                        const count = stageTotals[s.nummer].total;
-                        let color = "text-neutral-700";
-                        if (count > 0) color = "text-white font-black";
-                        if (count >= 5 && count <= 8) color = "text-amber-400 font-extrabold";
-                        if (count >= 9) color = "text-emerald-400 font-extrabold";
-                        return (
-                            <td key={`tot-${s.nummer}`} className={`p-1.5 text-center text-[11px] ${color}`}>
-                                {count || ''}
-                            </td>
-                        )
-                    })}
-                </tr>
+                {viewMode === 'opstelling' && (
+                  <tr className="divide-x divide-neutral-900 text-neutral-400">
+                      <td className="sticky left-0 bg-neutral-950 z-50"></td>
+                      <td className="p-3 sticky left-7 bg-neutral-950 z-50 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 shadow-[4px_0_15px_rgba(0,0,0,0.5)]">
+                          <Trophy className="w-4 h-4 text-amber-500" /> TOTAAL OPSTELLING
+                      </td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      {stages.map(s => {
+                          const count = stageTotals[s.nummer].total;
+                          let color = "text-neutral-700";
+                          if (count > 0) color = "text-white font-black";
+                          if (count >= 5 && count <= 8) color = "text-amber-400 font-extrabold";
+                          if (count >= 9) color = "text-emerald-400 font-extrabold";
+                          return (
+                              <td key={`tot-${s.nummer}`} className={`p-1.5 text-center text-[11px] ${color}`}>
+                                  {count || ''}
+                              </td>
+                          )
+                      })}
+                  </tr>
+                )}
+                {viewMode === 'scores' && (
+                  <>
+                    {/* Score rij: som van 9 opgestelde rijders */}
+                    <tr className="divide-x divide-neutral-900 text-neutral-400 border-t border-neutral-800">
+                        <td className="sticky left-0 bg-neutral-950 z-50"></td>
+                        <td className="p-2 sticky left-7 bg-neutral-950 z-50 text-[10px] font-black uppercase tracking-[0.15em] flex items-center gap-2 shadow-[4px_0_15px_rgba(0,0,0,0.5)] text-emerald-500">
+                            <BarChart2 className="w-3.5 h-3.5" /> Score
+                        </td>
+                        <td></td><td></td><td></td>
+                        {stages.map(s => {
+                            const st = scores?.perStage[s.nummer];
+                            return (
+                                <td key={`sc-${s.nummer}`} className="p-1 text-center text-[11px] font-black text-emerald-400">
+                                    {st?.score_opgesteld || ''}
+                                </td>
+                            );
+                        })}
+                        <td className="p-1 text-center text-[11px] font-black text-emerald-400">
+                            {scores ? Object.values(scores.perStage).reduce((s, v) => s + v.score_opgesteld, 0) || '' : ''}
+                        </td>
+                    </tr>
+                    {/* Max mogelijk rij */}
+                    <tr className="divide-x divide-neutral-900 text-neutral-400">
+                        <td className="sticky left-0 bg-neutral-950 z-50"></td>
+                        <td className="p-2 sticky left-7 bg-neutral-950 z-50 text-[10px] font-black uppercase tracking-[0.15em] flex items-center gap-2 shadow-[4px_0_15px_rgba(0,0,0,0.5)] text-neutral-500">
+                            <Trophy className="w-3.5 h-3.5" /> Max mogelijk
+                        </td>
+                        <td></td><td></td><td></td>
+                        {stages.map(s => {
+                            const st = scores?.perStage[s.nummer];
+                            const isSuboptimal = st && st.score_max_mogelijk > st.score_opgesteld;
+                            return (
+                                <td key={`mx-${s.nummer}`}
+                                    title={isSuboptimal ? `Je had ${st.score_max_mogelijk - st.score_opgesteld} pt meer kunnen scoren met een andere kopman` : undefined}
+                                    className={`p-1 text-center text-[11px] font-bold ${isSuboptimal ? 'text-amber-400' : 'text-neutral-700'}`}>
+                                    {st?.score_max_mogelijk || ''}
+                                </td>
+                            );
+                        })}
+                        <td className="p-1 text-center text-[11px] font-bold text-neutral-600">
+                            {scores ? Object.values(scores.perStage).reduce((s, v) => s + v.score_max_mogelijk, 0) || '' : ''}
+                        </td>
+                    </tr>
+                  </>
+                )}
             </tfoot>
           </table>
         </div>

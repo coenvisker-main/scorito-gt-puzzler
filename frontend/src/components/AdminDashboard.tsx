@@ -33,6 +33,11 @@ export function AdminDashboard() {
     const [importingStage, setImportingStage] = useState<number | 'all' | null>(null);
     const [lastImportOutput, setLastImportOutput] = useState<string | null>(null);
 
+    // Score berekening state
+    const [scoredStages, setScoredStages] = useState<Set<number>>(new Set());
+    const [calculatingStage, setCalculatingStage] = useState<number | 'all' | null>(null);
+    const [lastScoreOutput, setLastScoreOutput] = useState<string | null>(null);
+
     const showNotification = (type: 'success' | 'error', message: string) => {
         setNotification({ type, message });
         setTimeout(() => setNotification(null), 3000);
@@ -46,6 +51,38 @@ export function AdminDashboard() {
             }
         } catch (e) {
             console.error('Kon import-status niet ophalen', e);
+        }
+    };
+
+    const fetchScoredStages = async () => {
+        try {
+            const { data } = await supabase.from('stage_scores').select('stage_number');
+            if (data) {
+                setScoredStages(new Set(data.map((r: { stage_number: number }) => r.stage_number)));
+            }
+        } catch (e) {
+            console.error('Kon score-status niet ophalen', e);
+        }
+    };
+
+    const handleCalculateScores = async (nummer: number | 'all') => {
+        setCalculatingStage(nummer);
+        setLastScoreOutput(null);
+        try {
+            const res = await fetch(`${API_BASE}/api/calculate-scores/${nummer}`, { method: 'POST' });
+            const data = await res.json();
+            setLastScoreOutput(data.output ?? data.error ?? 'Geen output');
+            if (data.success) {
+                await fetchScoredStages();
+                showNotification('success', nummer === 'all' ? 'Alle scores berekend!' : `Scores etappe ${nummer} berekend`);
+            } else {
+                showNotification('error', `Berekening mislukt: ${data.error ?? 'Onbekende fout'}`);
+            }
+        } catch (e) {
+            showNotification('error', `Netwerkfout: ${e}`);
+            setLastScoreOutput(`Netwerkfout: ${e}`);
+        } finally {
+            setCalculatingStage(null);
         }
     };
 
@@ -86,6 +123,7 @@ export function AdminDashboard() {
                 setIsApiAvailable(false);
             }
             await fetchImportedStages();
+            await fetchScoredStages();
         };
         init();
     }, []);
@@ -568,6 +606,79 @@ export function AdminDashboard() {
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            {/* Score Berekeningen Card */}
+            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-2xl">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h3 className="text-xl font-black tracking-tighter text-white uppercase italic">Score Berekeningen</h3>
+                        <p className="text-neutral-500 text-xs font-bold uppercase tracking-wider mt-1">
+                            Basispunten per rijder berekenen en opslaan in Supabase
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => handleCalculateScores('all')}
+                        disabled={calculatingStage !== null || !isApiAvailable}
+                        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black uppercase tracking-wider text-xs transition-all shadow-lg ${
+                            calculatingStage !== null || !isApiAvailable
+                                ? 'bg-neutral-800 text-neutral-500 cursor-not-allowed'
+                                : 'bg-blue-500/10 text-blue-400 border border-blue-500/30 hover:bg-blue-500 hover:text-white hover:scale-105'
+                        }`}
+                    >
+                        {calculatingStage === 'all'
+                            ? <><RefreshCw className="w-4 h-4 animate-spin" /> Berekenen...</>
+                            : <><RefreshCw className="w-4 h-4" /> Bereken alle scores</>
+                        }
+                    </button>
+                </div>
+
+                {isApiAvailable === false && (
+                    <div className="mb-4 p-3 bg-blue-950/50 border border-blue-800/50 rounded-xl flex items-center gap-3">
+                        <Lock className="w-4 h-4 text-blue-400 shrink-0" />
+                        <p className="text-blue-300 text-xs font-bold">Read-only modus — berekeningen werken alleen lokaal.</p>
+                    </div>
+                )}
+
+                <div className="grid grid-cols-7 gap-2 mb-4">
+                    {Array.from({ length: 21 }, (_, i) => i + 1).map(n => {
+                        const isScored = scoredStages.has(n);
+                        const isLoading = calculatingStage === n;
+                        const isDisabled = calculatingStage !== null || !isApiAvailable;
+
+                        return (
+                            <button
+                                key={n}
+                                onClick={() => handleCalculateScores(n)}
+                                disabled={isDisabled}
+                                title={isScored ? `Etappe ${n} — opnieuw berekenen` : `Etappe ${n} berekenen`}
+                                className={`relative flex flex-col items-center justify-center p-2 rounded-xl text-xs font-black transition-all ${
+                                    isLoading
+                                        ? 'bg-blue-500/10 border border-blue-500/30 text-blue-400'
+                                        : isScored
+                                        ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-white'
+                                        : isDisabled
+                                        ? 'bg-neutral-950 border border-neutral-800 text-neutral-600 cursor-not-allowed'
+                                        : 'bg-neutral-950 border border-neutral-800 text-neutral-400 hover:border-neutral-600 hover:text-white'
+                                }`}
+                            >
+                                {isLoading
+                                    ? <RefreshCw className="w-3 h-3 animate-spin mb-0.5" />
+                                    : isScored
+                                    ? <CheckCircle2 className="w-3 h-3 mb-0.5" />
+                                    : <Clock className="w-3 h-3 mb-0.5 opacity-40" />
+                                }
+                                <span>{n}</span>
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {lastScoreOutput && (
+                    <div className="mt-2 p-4 bg-neutral-950 border border-neutral-800 rounded-xl text-blue-400 text-xs font-mono whitespace-pre-wrap max-h-48 overflow-y-auto">
+                        {lastScoreOutput}
+                    </div>
+                )}
             </div>
 
             {/* Etappe Resultaten Import Card */}

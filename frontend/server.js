@@ -173,6 +173,35 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
+    // POST /api/calculate-scores/:nummer  (nummer = "1"-"21" of "all")
+    const scoresMatch = req.url.match(/^\/api\/calculate-scores\/(\w+)$/);
+    if (scoresMatch && req.method === 'POST') {
+        const nummer = scoresMatch[1];
+        if (nummer !== 'all' && (isNaN(parseInt(nummer)) || parseInt(nummer) < 1 || parseInt(nummer) > 21)) {
+            res.writeHead(400);
+            res.end(JSON.stringify({ error: `Ongeldig etappenummer: ${nummer}` }));
+            return;
+        }
+        const scriptPath = path.resolve(__dirname, '../scripts/calculate_scores.py');
+        console.log(`[AdminAPI] Scores berekenen etappe ${nummer}...`);
+        exec(
+            `python "${scriptPath}" ${nummer}`,
+            { timeout: 300000 },
+            (error, stdout, stderr) => {
+                if (error) {
+                    console.error(`[AdminAPI] Scores fout: ${error.message}`);
+                    res.writeHead(500);
+                    res.end(JSON.stringify({ error: error.message, stderr, output: stdout }));
+                    return;
+                }
+                console.log(`[AdminAPI] Scores etappe ${nummer} klaar.`);
+                res.writeHead(200);
+                res.end(JSON.stringify({ success: true, output: stdout }));
+            }
+        );
+        return;
+    }
+
     // Fallback
     res.writeHead(404);
     res.end(JSON.stringify({ error: 'Not found' }));
