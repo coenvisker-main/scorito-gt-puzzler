@@ -2,7 +2,168 @@
 
 ---
 
-## Sprint 3 → Sprint 4
+## Sprint 4 → Sprint 5
+
+**Datum:** 2026-05-12
+**Branch:** `main` (commit `92e15af`, gemerged vanuit `claude/elastic-tereshkova-b25112`)
+**Volgende sprint:** Sprint 5 — Eindklassement scoring + Community scorebord
+
+---
+
+### Wat er gedaan is in Sprint 4
+
+#### 1. Responsive Team-tab herontwerp — 3 sub-tabs
+
+De monolithische `TeamMatrix.tsx` (desktop) + `MobileTeamView.tsx` (mobiel) zijn vervangen door een gelaagde sub-tab structuur die op alle viewports werkt.
+
+**Nieuwe componentenstructuur:**
+
+| Bestand | Omschrijving |
+|---------|-------------|
+| `frontend/src/components/TeamSection.tsx` | Wrapper; accepteert `activeTab` + `onTabChange` als props van App.tsx |
+| `frontend/src/components/SubTabBar.tsx` | Pill-navigatie, alleen zichtbaar op mobiel (`lg:hidden`) |
+| `frontend/src/components/TeamRidersTab.tsx` | Budget progress bar (gradient) + 20 renner-slots + type-verdeling |
+| `frontend/src/components/TeamLineupTab.tsx` | Compacte X/K matrix per etappe; horizontale scroll op mobiel |
+| `frontend/src/components/TeamScoresTab.tsx` | Score-matrix; amber missed-opportunity cellen; mobiel etappe-cards |
+
+**Navigatie-architectuur:**
+- **Mobiel** (`< lg`): `SubTabBar` pill-nav onder de content — `flex-1` buttons zodat ze gelijkmatig de volle breedte verdelen
+- **Desktop** (`lg+`): tweede rij in de sticky navbar van `App.tsx` — underline border-bottom stijl, alleen zichtbaar als `activeTab === 'teambuilder'`
+
+#### 2. Missed-opportunity amber highlighting (TeamScoresTab)
+
+**Probleem ontdekt:** de backend zet `totaal = 0` voor niet-opgestelde renners, ook als die renner wél scoorde. De individuele componentvelden (`punten_etappe`, `punten_gc`, etc.) bevatten wél de correcte waarden.
+
+**Oplossing — `rawScore()` helper:**
+```ts
+function rawScore(s: ScoreEntry): number {
+  return s.punten_etappe + s.punten_gc + s.punten_punten
+       + s.punten_kom + s.punten_jong + s.punten_team + s.punten_kopman_bonus;
+}
+```
+
+Cellogica:
+- `opgesteld = true` → groene cel met `totaal`
+- `opgesteld = false` en `rawScore > 0` → amber cel met gemist aantal punten
+- anders → lege cel
+
+Mobiele etappe-cards tonen dezelfde scheiding: opgestelde renners + niet-opgesteld-maar-scoorde (amber "niet opgesteld" label).
+
+#### 3. DistributionSummary — hideFormula prop
+
+`DistributionSummary` heeft nu een `hideFormula?: boolean` prop. In `TeamRidersTab` wordt dit als `hideFormula` meegegeven zodat de TCS-formula-sliders niet verschijnen in de team-tab; alleen de kaartjes met de type-verdeling zijn zichtbaar.
+
+---
+
+### Huidige staat na Sprint 4
+
+**Supabase project:** `tegssdqwvzpmlwzhtfiw` (eu-central-1, ACTIVE_HEALTHY)
+**race_edition_id:** `dfaabe0c-d838-4942-96dd-0071fce726b7`
+
+| Etappe | stage_results | stage_scores | Status |
+|--------|--------------|--------------|--------|
+| 1–3 | ✅ Compleet | ✅ Berekend + geverifieerd | OK |
+| 4 | ⚠️ Onvolledig | ❌ Nog niet | Herimporten zodra PCS beschikbaar |
+| 5–21 | ❌ Niet beschikbaar | ❌ Niet beschikbaar | Wachten op etappes |
+
+**Dagelijkse workflow (ongewijzigd):**
+```
+1. python scripts/import_stage_results.py N    (of Admin UI)
+2. python scripts/calculate_scores.py N        (of Admin UI)
+3. Verificeer in Teambuilder → Scores-tab
+```
+
+> **Let op:** de Admin UI vereist dat `node frontend/server.js` (poort 3001) apart gestart is naast de Vite dev server.
+
+---
+
+### Sprint 5 — Eindklassement scoring + Community scorebord
+
+#### Doel
+
+Na de laatste etappe (etappe 21) komen eindklassementpunten beschikbaar. Sprint 5 implementeert de eindscoring en maakt het vriendengroep-scorebord af.
+
+#### Prioriteit 1: Eindklassement berekening
+
+**Puntentabel eindklassement** (telt voor alle 20 teamleden, niet alleen de 9 opgestelden):
+
+| Klassement | Punten |
+|---|---|
+| GC top 20 | `[100,80,60,50,40,36,32,28,24,22,20,18,16,14,12,10,8,6,4,2]` |
+| Puntenklassement top 10 | `[80,60,40,30,20,16,12,8,4,2]` |
+| Bergklassement top 10 | `[80,60,40,30,20,16,12,8,4,2]` |
+| Jongerenklassement top 5 | `[60,40,30,20,10]` |
+| Eindklassement teampunten | GC-winnaar=24, Puntenleider=18, KOM-leider=18, Jongerenleider=9 |
+
+**Architectuurkeuze (nog te bepalen):**
+- Optie A: aparte `final_scores` tabel
+- Optie B: `stage_number = 0` (of `null`) in `stage_scores` als eindklassement-marker
+
+Voorkeur: optie B is eenvoudiger, hergebruikt bestaande hook/scoreUtils-structuur.
+
+**Betrokken bestanden:**
+- `scripts/calculate_scores.py` — uitbreiden met `all-final` argument voor eindscoring
+- `frontend/src/utils/scoreUtils.ts` — eindklassement-punten verwerken (alle slots, niet alleen opgesteld)
+- `frontend/src/hooks/useStageScores.ts` — eindklassement-rijen ophalen
+- `frontend/src/components/TeamScoresTab.tsx` — optionele "Eindklassement" kolom toevoegen
+
+#### Prioriteit 2: Community scorebord
+
+**US-3.3** — na etappe 21: toon voor elke groep alle ingediende teams gerangschikt op totaalscore.
+
+**Betrokken bestanden:**
+- `frontend/src/components/CommunityDashboard.tsx`
+- `frontend/src/context/CommunityContext.tsx`
+- Supabase: `submitted_teams` tabel heeft al team-data; scores opvragen via `useStageScores` per team
+
+#### Prioriteit 3: "Alleen hoogste trui" herverificatie
+
+Als in een latere etappe één rider tegelijk GC én puntenleider is (en in jouw opgestelde team zit), controleer of Scorito dan cumulatief of alleen-hoogste-trui telt. Huidige implementatie is cumulatief — als Scorito afwijkt, `scoreUtils.ts` aanpassen.
+
+---
+
+### Roadmap — Overig openstaand werk
+
+#### Middelhoge prioriteit (vóór Tour de France 2026)
+
+| Item | US | Toelichting |
+|---|---|---|
+| Scraper → `procyclingstats` | US-1.1, 1.2 | `import_riders.py` + `import_stages.py` refactoren |
+| Multi-ronde configuratie | US-1.4 | Race-URL configureerbaar (niet hardcoded Giro 2026) |
+| PCS-specialisatiescores | US-1.3 | `Rider(url).points_per_speciality()` voor alle renners |
+
+#### Lagere prioriteit (na de ronde)
+
+| Item | Toelichting |
+|---|---|
+| Optimale team-analyse (US-5.1, 5.2) | Beste 9+kopman per etappe, beste team van 20 binnen budget |
+| Renner-vergelijker (US-6.1–6.3) | PCS-scores als radarchart, side-by-side vergelijker |
+| Historisch archief (US-7.1, 7.2) | Team + scores per ronde-editie bewaren |
+
+#### Technische schuld / backlog
+
+- **RLS uitschakelen**: `groups` en `votes` tabellen hebben geen Row Level Security
+- **Dagelijkse opstelling syncen** (US-4.1 uitbreiding): X/K-opstelling staat nu alleen in localStorage; kan gesynct worden zodra auth/multi-device verder uitgebreid wordt
+
+---
+
+### Bestandsoverzicht Sprint 4
+
+```
+frontend/src/App.tsx                                — teamTab state + desktop sub-nav in sticky nav
+frontend/src/components/
+  SubTabBar.tsx                                     — nieuw: mobile pill-navigatie
+  TeamSection.tsx                                   — nieuw: sub-tab wrapper (accepteert props)
+  TeamRidersTab.tsx                                 — nieuw: budget bar + rennersbeheer
+  TeamLineupTab.tsx                                 — nieuw: compacte X/K matrix
+  TeamScoresTab.tsx                                 — nieuw: score matrix + missed-opportunity
+  DistributionSummary.tsx                           — hideFormula prop + grotere getallen
+```
+
+---
+
+<details>
+<summary>Sprint 3 → Sprint 4 (ingeklapt)</summary>
 
 **Datum:** 2026-05-12
 **Branch:** `main` (commit `7ec3f88`, gemerged vanuit `claude/inspiring-beaver-8b640e`)
@@ -358,4 +519,4 @@ Credentials: `scripts/.env` (aanmaken via `scripts/.env.example`)
 
 ---
 
-*Laatste update: 2026-05-12 (Sprint 3 → Sprint 4)*
+*Laatste update: 2026-05-12 (Sprint 4 → Sprint 5)*
