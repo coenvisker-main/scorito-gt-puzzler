@@ -2,7 +2,90 @@
 
 ---
 
+## Planning → Sprint 0 (Tour de France 2026 heropbouw)
+
+**Datum:** 2026-06-30
+**Branch:** `claude/fervent-bartik-cb4fa4`
+**Volgende sprint:** Sprint 0 — Infra herstellen + Giro afsluiten
+
+---
+
+### Context: waarom een nieuwe sprintreeks
+
+Sprint 4 → Sprint 5 (zie hieronder) is destijds nooit uitgevoerd: het eindklassement en het
+community-scorebord voor de Giro d'Italia 2026 staan nog open. Inmiddels (2026-06-30) is de Giro volledig
+gereden en zitten we in de voorbereiding op de **Tour de France 2026**. Deze sessie heeft geen code
+aangepast — het was een planningssessie die een nieuwe sprintreeks heeft opgezet om (a) de Giro netjes af
+te sluiten, (b) de app generiek multi-ronde te maken, en (c) twee functionele uitbreidingen toe te voegen:
+diepere renner-analyse via ProCyclingStats en een directe Scorito-koppeling voor prijzen/categorieën.
+
+**Het volledige plan staat in:**
+`C:\Users\chvis\.claude\plans\c-users-chvis-projects-scorito-data-scr-twinkling-hopcroft.md`
+
+Lees dit bestand eerst — het bevat de volledige context, alle sprints (0 t/m 4) met concrete
+bestandspaden/regelnummers, en de verificatie-criteria per sprint. Deze handoff herhaalt niet alles, alleen
+de status en eerstvolgende acties.
+
+**Let op — sprintnummering:** deze nieuwe reeks begint weer bij "Sprint 0", los van de Giro-sprints 1–4
+hieronder (die blijven staan als historisch archief/referentie, met name de puntentabellen).
+
+---
+
+### Bevindingen uit deze planningssessie (al geverifieerd, niet opnieuw te onderzoeken)
+
+- **Supabase-project `tegssdqwvzpmlwzhtfiw` staat op INACTIVE** (gepauzeerd) — bevestigd via
+  `mcp__supabase__list_projects`. Moet als eerste hersteld worden (`restore_project`).
+- **GitHub en Netlify zijn gewoon verbonden** — laatste deploy (commit `0a80ec1`) staat live en "ready" op
+  `scorito-gt-puzzler.netlify.app`. Geen actie nodig hiervoor.
+- **Supabase-schema (`scripts/seed_supabase.py`) bevestigd**: `riders`-tabel heeft al kolommen `pcs_gc`,
+  `pcs_tt`, `pcs_sprint`, `pcs_climber`, `pcs_hills`, `pcs_one_day`, `pcs_leeftijd` (ongevuld). `riders`
+  heeft GEEN `race_edition_id` (renners zijn nu globaal — kern van het Sprint 1-werk in het plan). De
+  `race_editions`-tabel heeft al `race_slug`/`race_url`/`budget`/`status`.
+- **`procyclingstats`-library is al geverifieerd werkend** in een eerdere sessie (`scripts/test_pcs_library.py`,
+  `LIBRARY_TEST_RESULTS.md`) — RaceStartlist, Race.stages(), Stage.results()/.gc()/.points()/.kom()/.youth(),
+  Rider.points_per_speciality()/.birthdate() werken allemaal. Geen nieuw feasibility-onderzoek nodig in
+  Sprint 3 van het plan.
+- **Geen bestaande Scorito-API-koppeling** in deze app — prijzen worden handmatig bijgehouden via
+  `scripts/fix_prices.py` (kapot pad naar oude Antigravity-scratchmap!), `update_prices.py`,
+  `bulk_update_prices.py`. De losse repo `C:\Users\chvis\Projects\Scorito-data-scraper` heeft een kant-en-
+  klare, stdlib-only `ScoritoClient` + `cycling_riders()`-normalizer die dit gat dicht (Sprint 4 van het
+  plan).
+- **De Scorito Tour 2026-markt staat al live**, maar de startlijst is nog niet compleet — de Scorito-import
+  (Sprint 4) moet dus herhaaldelijk draaibaar zijn, niet eenmalig.
+
+### Gebruikerskeuzes (al vastgesteld, niet opnieuw vragen)
+
+- Giro-eindklassement eerst kort afronden, dan pas de Tour-ombouw.
+- Architectuur wordt generiek multi-ronde (geen harde knip naar Tour-only) — Giro blijft archief.
+- PCS-analyse: eerst basis (specialisatiescores/ranking/vorm in bestaande tabellen), renner-vergelijker
+  blijft backlog.
+- Scorito-sync: herhaalbaar draaibaar script, geen cron-automatisering nu.
+- **Werkwijze**: lokaal testen is de norm, niet per se deployen per sprint (mogelijk 1 deploy na de laatste
+  sprint — gebruikers keuze). Elke sprint start met een korte refinement met de gebruiker voordat er gebouwd
+  wordt. Tussentijdse bevindingen (uitbreidingen, bugs, aandachtspunten) gaan meteen naar `backlog.md` of de
+  lopende sprint-sectie hier — niet pas bij de handoff.
+
+### Sprint 0 — nog NIET gestart, eerstvolgende acties
+
+Deze sessie eindigde met twee openstaande verduidelijkingsvragen aan de gebruiker, **nog niet beantwoord**:
+
+1. Is er nog een geldige Supabase **anon key** beschikbaar (in `scripts/.env` of als Netlify env var), of
+   moet die na het herstellen van het project opnieuw opgehaald worden?
+2. Zijn er voor de Tour, naast de 4 standaard klassementen (GC/Punten/Berg/Jong), nog
+   **categorie-specifieke Scorito-regels** voor het eindklassement, of is de puntentabel uit de Sprint 4→5
+   sectie hieronder (regels onder "Puntentabel eindklassement") leidend?
+
+**Volgende agent: stel deze twee vragen aan de gebruiker** (of check of ze inmiddels al beantwoord zijn),
+en voer daarna Sprint 0 uit zoals beschreven in het plan-bestand: Supabase herstellen, lokale rooktest,
+eindklassement-scoring, community-scorebord, "alleen hoogste trui"-verificatie over de volledige Giro-data.
+
+---
+
 ## Sprint 4 → Sprint 5
+
+> **Status: gedeeltelijk superseded.** Het hieronder beschreven Sprint 5-werk (eindklassement + scorebord)
+> is nu Sprint 0 van de nieuwe Tour de France-roadmap hierboven — de aanpak/puntentabellen blijven geldig
+> referentiemateriaal, maar volg voor de huidige stand de sectie hierboven.
 
 **Datum:** 2026-05-12
 **Branch:** `main` (commit `92e15af`, gemerged vanuit `claude/elastic-tereshkova-b25112`)

@@ -7,7 +7,11 @@ Tool voor het samenstellen en analyseren van een Scorito-team voor grote rondes 
 Gedeployd op Netlify. GitHub: `github.com/coenvisker-main/scorito-gt-puzzler`
 
 ## Status
-In actieve ontwikkeling. Zie `backlog.md` voor openstaande features.
+In heropbouw richting **Tour de France 2026** (app was gebouwd rond de inmiddels afgelopen Giro d'Italia
+2026). Supabase-project stond gepauzeerd (INACTIVE) — moet als eerste hersteld worden. Zie
+`SPRINT_HANDOFF.md` (bovenste sectie "Planning → Sprint 0") voor de actuele sprintreeks en
+`C:\Users\chvis\.claude\plans\c-users-chvis-projects-scorito-data-scr-twinkling-hopcroft.md` voor het
+volledige plan. Zie ook `backlog.md` voor losse, niet-sprintgebonden features.
 
 ## Architectuur
 - `frontend/` — hoofdapplicatie (webinterface)
@@ -25,7 +29,10 @@ git push origin main
 ```
 
 ## Openstaande prioriteiten
-Zie `backlog.md` — kortetermijn: etappe sortering, startlijst pop-up, US-03 analyse.
+Sprint 0 (infra herstellen + Giro afsluiten) — zie `SPRINT_HANDOFF.md`. Daarna multi-ronde architectuur,
+Tour-data, PCS-renneranalyse, Scorito-prijskoppeling (Sprints 1–4 in het plan-bestand). Kleinere losse
+features: zie `backlog.md`.
 
 ## Laatste wijzigingen
-_[bijwerken bij relevante commits]_
+_2026-06-30: planningssessie — nieuwe sprintreeks (Sprint 0–4) opgezet voor Tour de France 2026-heropbouw;
+geen code gewijzigd, alleen documentatie/plan. Zie `SPRINT_HANDOFF.md`._
