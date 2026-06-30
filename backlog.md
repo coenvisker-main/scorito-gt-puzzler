@@ -11,6 +11,9 @@ Dit document houdt wensen en ideeën bij die buiten de scope van de huidige iter
 - [ ] **Optimale team-analyse:** Beste 9 + kopman per etappe, en beste team van 20 binnen budget berekenen (US-5.1, 5.2).
 - [ ] **Historisch archief:** Team + scores per ronde-editie structureel bewaarbaar/terugkijkbaar maken (US-7.1, 7.2) — los van de basis-archieffunctie die Sprint 1 van de multi-ronde-architectuur al biedt.
 
+## ⚠️ Voor productie-deploy (blocker)
+- [ ] **GitHub PAT mist PR-schrijfrechten:** de `GITHUB_TOKEN` die de GitHub MCP-server gebruikt kan wel lezen (commits, PR-lijst) maar geen pull requests aanmaken — `create_pull_request` geeft `Permission Denied: Resource not accessible by personal access token`. De `gh` CLI is ook niet beschikbaar in deze omgeving als fallback. Ontdekt: 2026-06-30, branch `claude/fervent-bartik-cb4fa4` moest handmatig gemerged worden omdat de PR niet via tooling kon worden aangemaakt. **Fix vóór een productie-deploy naar de Tour de France-markt:** token-scope uitbreiden (`repo`/`pull_request`-schrijfrechten) in de GitHub MCP-config, of `gh` CLI installeren als alternatief pad.
+
 ## 🔒 Technische schuld
 - [ ] **RLS inschakelen:** `groups`- en `votes`-tabellen in Supabase hebben geen Row Level Security. Niet urgent voor een kleine vriendengroep, wel een aandachtspunt zodra de groep groeit of de app breder gedeeld wordt.
 
